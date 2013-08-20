@@ -20,7 +20,7 @@ git clone git@github.com:gerbaudo/fbu.git
 virtualenv fbu
 cd fbu
 source bin/activate
-cat requeriments.txt | xargs pip install
+cat requirements.txt | xargs pip install
 python tests/pymc_test/unfold.py
 ...
 deactivate
