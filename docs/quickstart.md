@@ -1,20 +1,37 @@
 Instructions to get started quickly with one of the examples.
 
 Running tests
-    python -m unittest tests.dummy
+-------------
+
+```
+python -m unittest tests.dummy
+```
 
 
-Installation within virtualenv
+Installation
+------------
 
-If you don't have permission to install python packages, you can
-install the requirements within virutalenv (requires pyton>=2.6):
+The recommended installation is with virtualenv.
 
-> cd fbu
-> virtualenv ENV
-> source ENV/bin/activate
-> pip -v install numpy
-> pip -v install scipy
-> pip -v install pylab
-> pip -v install pymc
+First time:
 
-DG To be completed (having some issues with pylab...might be specific to gentoo)
+```
+git clone git@github.com:gerbaudo/fbu.git
+virtualenv fbu
+cd fbu
+source bin/activate
+cat requirements.txt | xargs pip install
+python tests/pymc_test/unfold.py
+...
+deactivate
+```
+
+From then on:
+
+```
+cd fbu
+source bin/activate
+python tests/pymc_test/unfold.py
+```
+
+The instructions above have been tested with `python>=2.6.6`, on SLC6 and gentoo.
