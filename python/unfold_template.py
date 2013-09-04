@@ -1,7 +1,7 @@
 #!/bin/env python
 
 # This file defines a template model for a simple unfolding.
-# The values that need to be filled in are the ones in '%()s'
+# The values that need to be filled in are the ones formatted with percent
 
 from pymc import *
 from numpy import array, empty
