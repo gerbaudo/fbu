@@ -2,7 +2,7 @@ import commands, os
 from pymc import MCMC
 from numpy import array,mean,std
 import matplotlib.pyplot as plt
-from pylab import *
+from pylab import savefig
 
 data        = 'array([11064,11804,11780,11135])'
 migrations  = 'array([[0.1,0,0,0],[0,0.1,0,0],[0,0,0.1,0],[0,0,0,0.1]])'
