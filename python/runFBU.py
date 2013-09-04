@@ -4,8 +4,15 @@ from numpy import array,mean,std
 import matplotlib.pyplot as plt
 from pylab import *
 
-data        = 'array([11064,11804,11780,11135])'
-migrations  = 'array([[0.1,0,0,0],[0,0.1,0,0],[0,0,0.1,0],[0,0,0,0.1]])'
+#histTruth
+truthhist = array([104303.6640625,105277.6796875,105633.7109375,106462.5078125])
+
+
+#histReco
+data        = 'array([11064.75,11804.203125,11780.1181640625,11135.34375])'
+
+#Truth versus Reco Migration matrix from protos MC, 2011 7TeV charge asymmetry analysis (closure test)
+migrations  = 'array([[0.063770,0.022177,0.011848,0.007905],[0.022544,0.051560,0.026740,0.011981],[0.011556,0.026787,0.051118,0.022614],[0.007696,0.011584,0.021881,0.062564]])'
 truth_do    = '5000'
 truth_up    = '150000'
 
@@ -54,8 +61,8 @@ if __name__ == "__main__":
     import mytemplate
     mcmc = MCMC(mytemplate)
     mcmc.sample(100000,burn=1000,thin=10)
-
     unf_trace = mcmc.trace("truth")[:]
+    print unf_trace
     #plt.hist(zip(*unf_trace)[0],bins=100,range=[100000,120000])
     plt.hist(zip(*unf_trace)[0],bins=100)
     print'\n'
