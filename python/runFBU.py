@@ -26,7 +26,7 @@ if __name__ == "__main__":
     verbose   = options.verbose
 
     #prepare the model
-    outputFile = 'mytemplate.py'
+    outputFile = os.path.dirname(inputFile)+'/'+'mytemplate.py'
     if os.path.exists(outputFile) :
         if verbose : print "removing existing ouput '%s'"%outputFile
         os.remove(outputFile)
