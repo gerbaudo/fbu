@@ -20,11 +20,9 @@ if __name__ == "__main__":
     parser = OptionParser()
     parser.add_option ("-i","--inputFile",
                        help="input files to be uses as template",
-                       dest="inputFile",
                        default="")
     parser.add_option ("-v","--verbose",
                        help="Turn on verbose printout",
-                       dest="verbose",
                        action="store_true",
                        default=False)
 
