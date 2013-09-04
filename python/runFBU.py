@@ -21,12 +21,11 @@ if __name__ == "__main__":
     parser.add_option ("-i","--inputFile", help="input template file")
     parser.add_option ("-o","--outputFile", help="where the model is defined")
     parser.add_option ("-v","--verbose", help="Toggle verbose", action="store_true", default=False)
-    (options, args) = parser.parse_args()
-    if not options.inputFile : parser.error('Template not given')
-    inputFile  = options.inputFile
-    outputFile = (options.outputFile if options.outputFile
-                  else os.path.dirname(inputFile)+'/'+'mytemplate.py')
-    verbose    = options.verbose
+    (opts, args) = parser.parse_args()
+    if not opts.inputFile : parser.error('Template not given')
+    inputFile  = opts.inputFile
+    outputFile = opts.outputFile if opts.outputFile else os.path.dirname(inputFile)+'/'+'mymodel.py'
+    verbose    = opts.verbose
 
     #prepare the model
     if os.path.exists(outputFile) :
