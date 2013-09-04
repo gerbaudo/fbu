@@ -21,6 +21,7 @@ if __name__ == "__main__":
     parser.add_option ("-i","--inputFile", help="input template file")
     parser.add_option ("-v","--verbose", help="Toggle verbose", action="store_true", default=False)
     (options, args) = parser.parse_args()
+    if not options.inputFile : parser.error('Template not given')
     inputFile = options.inputFile
     verbose   = options.verbose
 
