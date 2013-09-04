@@ -19,14 +19,16 @@ if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option ("-i","--inputFile", help="input template file")
+    parser.add_option ("-o","--outputFile", help="where the model is defined")
     parser.add_option ("-v","--verbose", help="Toggle verbose", action="store_true", default=False)
     (options, args) = parser.parse_args()
     if not options.inputFile : parser.error('Template not given')
-    inputFile = options.inputFile
-    verbose   = options.verbose
+    inputFile  = options.inputFile
+    outputFile = (options.outputFile if options.outputFile
+                  else os.path.dirname(inputFile)+'/'+'mytemplate.py')
+    verbose    = options.verbose
 
     #prepare the model
-    outputFile = os.path.dirname(inputFile)+'/'+'mytemplate.py'
     if os.path.exists(outputFile) :
         if verbose : print "removing existing ouput '%s'"%outputFile
         os.remove(outputFile)
@@ -36,11 +38,10 @@ if __name__ == "__main__":
               'upper':truth_up
               }
     formatTemplate(inputFile, outputFile, values)
-    #Import the model
+    if verbose : print "importing model '%s'"%outputFile
     mytemplate = __import__(os.path.basename(outputFile).replace('.py',''))
     mcmc = MCMC(mytemplate)
     mcmc.sample(100000,burn=1000,thin=10)
-
     unf_trace = mcmc.trace("truth")[:]
     #plt.hist(zip(*unf_trace)[0],bins=100,range=[100000,120000])
     plt.hist(zip(*unf_trace)[0],bins=100)
