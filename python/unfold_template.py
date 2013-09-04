@@ -3,7 +3,7 @@
 # This file defines a template model for a simple unfolding.
 # The values that need to be filled in are the ones formatted with percent
 
-from pymc import *
+from pymc import DiscreteUniform, Poisson, deterministic
 from numpy import array, empty
 
 #Data points of the distribution to unfold

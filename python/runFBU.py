@@ -1,5 +1,5 @@
 import commands, os
-from pymc import *
+from pymc import MCMC
 from numpy import array,mean,std
 import matplotlib.pyplot as plt
 from pylab import *
