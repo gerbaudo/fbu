@@ -27,8 +27,9 @@ if __name__ == "__main__":
 
     #prepare the model
     outputFile = 'mytemplate.py'
-    if os.path.exists(outputFile):
-        commands.getstatusoutput('rm %s'%outputFile)
+    if os.path.exists(outputFile) :
+        if verbose : print "removing existing ouput '%s'"%outputFile
+        os.remove(outputFile)
     values = {'data':data,
               'mmatrix':migrations,
               'lower':truth_do,
