@@ -1,3 +1,8 @@
+#!/bin/env python
+
+# This file defines a template model for a simple unfolding.
+# The values that need to be filled in are the ones in '%()s'
+
 from pymc import *
 from numpy import array, empty
 
@@ -27,3 +32,9 @@ def unfold(truth=truth):
 
 #This is the unfolded distribution
 unfolded = Poisson('unfolded', mu=unfold, value=data, observed=True, size=nreco)
+
+if __name__=='__main__' :
+    print """
+    Do not call this module by itself.
+    Fill in the template values, and then import it from a script.
+    """
