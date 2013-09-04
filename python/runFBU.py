@@ -18,14 +18,8 @@ def formatTemplate(infile, outfile, values={}) :
 if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser()
-    parser.add_option ("-i","--inputFile",
-                       help="input files to be uses as template",
-                       default="")
-    parser.add_option ("-v","--verbose",
-                       help="Turn on verbose printout",
-                       action="store_true",
-                       default=False)
-
+    parser.add_option ("-i","--inputFile", help="input template file")
+    parser.add_option ("-v","--verbose", help="Toggle verbose", action="store_true", default=False)
     (options, args) = parser.parse_args()
     inputFile = options.inputFile
     verbose   = options.verbose
