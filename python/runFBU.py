@@ -37,7 +37,7 @@ if __name__ == "__main__":
               }
     formatTemplate(inputFile, outputFile, values)
     #Import the model
-    import mytemplate
+    mytemplate = __import__(os.path.basename(outputFile).replace('.py',''))
     mcmc = MCMC(mytemplate)
     mcmc.sample(100000,burn=1000,thin=10)
 
