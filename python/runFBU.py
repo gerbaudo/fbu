@@ -9,18 +9,11 @@ migrations  = 'array([[0.1,0,0,0],[0,0.1,0,0],[0,0,0.1,0],[0,0,0,0.1]])'
 truth_do    = '5000'
 truth_up    = '150000'
 
-def inplace_change(infile, outfile, old_string, new_string):
-        s=open(infile).read()
-        if old_string in s:
-                print 'Changing "{old_string}" to "{new_string}"'.format(**locals())
-                s=s.replace(old_string, new_string)
-                f=open(outfile, 'w')
-                f.write(s)
-                f.flush()
-                f.close()
-        else:
-                print 'No occurances of "{old_string}" found.'.format(**locals())
-
+def formatTemplate(infile, outfile, values={}) :
+        f=open(outfile, 'w')
+        f.write(open(infile).read()%values)
+        f.flush()
+        f.close()
 
 if __name__ == "__main__":
     from optparse import OptionParser
@@ -34,7 +27,7 @@ if __name__ == "__main__":
                        dest="verbose",
                        action="store_true",
                        default=False)
-    
+
     (options, args) = parser.parse_args()
     inputFile = options.inputFile
     verbose   = options.verbose
@@ -43,13 +36,12 @@ if __name__ == "__main__":
     outputFile = 'mytemplate.py'
     if os.path.exists(outputFile):
         commands.getstatusoutput('rm %s'%outputFile)
-
-    inplace_change(inputFile , outputFile, '@DATA@'   , data)
-    inplace_change(outputFile, outputFile, '@MMATRIX@', migrations)
-    inplace_change(outputFile, outputFile, '@LOW@'    , truth_do)
-    inplace_change(outputFile, outputFile, '@HIGH@'   , truth_up)
-
-
+    values = {'data':data,
+              'mmatrix':migrations,
+              'lower':truth_do,
+              'upper':truth_up
+              }
+    formatTemplate(inputFile, outputFile, values)
     #Import the model
     import mytemplate
     mcmc = MCMC(mytemplate)
