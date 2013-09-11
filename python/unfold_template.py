@@ -8,6 +8,7 @@ from numpy import array, empty
 
 #Data points of the distribution to unfold
 data = %(data)s
+bkgd = %(bg)s
 
 #This is the number of data bins
 nreco = len(data)
@@ -24,6 +25,8 @@ def unfold(truth=truth):
     out = empty(nreco)
     for r in xrange(nreco):
         tmp=0.
+        for b in bkgd:
+            tmp+=bkgd[b][r]
         for t in xrange(nreco):
             tmp += truth[t]*migrations[r][t]
         out[r:r+1] = tmp 
