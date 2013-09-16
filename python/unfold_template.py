@@ -14,7 +14,7 @@ bkgd = %(bg)s
 nreco = len(data)
 
 #Migration matrix truth level -> reconstructed level
-migrations = %(mmatrix)s
+migrations = array(%(mmatrix)s)
 
 #define uniformely distributed variable truth, range betweem lower and upper, for nreco variables
 truth = DiscreteUniform('truth', lower=%(lower)s, upper=%(upper)s, doc='truth', size=nreco)
