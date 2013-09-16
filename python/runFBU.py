@@ -34,6 +34,8 @@ def getBackground(jsonfname='', variation='Nominal') :
     nameBkg1 = 'BG'
     valuesBkg1 = str(json.load(open(jsonfname))[nameBkg1][variation])
     return "{ 'background1' : %s }" % valuesBkg1
+def defaultModelFname(templateFname='') :
+    return os.path.dirname(os.path.abspath(templateFname))+'/mymodel.py'
 
 if __name__ == "__main__":
     projectDir = os.path.dirname(os.path.abspath(__file__)).replace('/python','')
@@ -55,15 +57,13 @@ if __name__ == "__main__":
     jsonMig       = opts.matrix
     jsonBkg       = opts.background
     templateFile  = opts.template
-    modelFile     = opts.model if opts.model else os.path.dirname(templateFile)+'/'+'mymodel.py'
+    modelFile     = opts.model if opts.model else defaultModelFname(templateFile)
     verbose       = opts.verbose
 
     if verbose :
         print 'Options:'
         print '\n'.join("%s : %s"%(v, str(eval(v))) for v in ['jsonData','jsonMig','jsonBkg',
                                                               'templateFile','modelFile'])
-    if modelFile[0]=='/': modelFile = modelFile[1:]
-
     #prepare the model
     if os.path.exists(modelFile) :
         if verbose : print "removing existing model '%s'"%modelFile
