@@ -1,5 +1,6 @@
-import commands, os
+import commands
 import json
+import os
 
 from pymc import MCMC
 from numpy import array,mean,std
@@ -92,12 +93,12 @@ if __name__ == "__main__":
         if verbose : print "removing existing ouput '%s'"%outputFile
         os.remove(outputFile)
 
-
+    projectDir = os.path.dirname(os.path.abspath(__file__)).replace('/python','')
     values = {'data':data,
               'mmatrix':migrations,
               'lower':truth_do,
               'upper':truth_up,
-              'bg':addBG('/afs/cern.ch/user/h/helsens/TopWork/Unfolding/fbu/python/BG.json')
+              'bg':addBG(projectDir+'/data/background.json')
               }
 
     formatTemplate(inputFile, outputFile, values)
