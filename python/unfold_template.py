@@ -7,7 +7,7 @@ from pymc import DiscreteUniform, Poisson, deterministic
 from numpy import array, empty
 
 #Data points of the distribution to unfold
-data = %(data)s
+data = array(%(data)s)
 bkgd = %(bg)s
 
 #This is the number of data bins
