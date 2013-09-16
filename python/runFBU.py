@@ -8,26 +8,15 @@ import matplotlib.pyplot as plt
 from pylab import savefig
 from pymc.Matplot import plot
 
-############################################
-# MCMC configuration
-############################################
-#number of MCMC trials
-nMCMC = 100000
+# MCMC parameters
+nMCMC = 100000 # N trials
+nBurn = 1000   # todo: describe
+nThin = 10     # todo: describe
 
-#burn value -> MCMC will skip them
-nBurn = 1000
+# model parameters (other numerical values read in from inputs)
+lower = 1000 # lower sampling bound
+upper = 1500 # upper sampling bound
 
-#thin parameter, remove 
-nThin = 10
-############################################
-
-
-############################################
-# Things to be changed in the template file
-############################################
-lower = '1000'
-upper = '1500'
-############################################
 
 def asString(val) : return str(val)
 
@@ -36,6 +25,7 @@ def formatTemplate(infile, outfile, values={}) :
     f.write(open(infile).read()%values)
     f.flush()
     f.close()
+
 def getBackground(jsonfname='', variation='Nominal') :
     """Read bkg from json file. Note that because we are using this to
     fill in a template, we are returning a string, and not the actual
@@ -46,37 +36,50 @@ def getBackground(jsonfname='', variation='Nominal') :
     return "{ 'background1' : %s }" % valuesBkg1
 
 if __name__ == "__main__":
-    from optparse import OptionParser
-    parser = OptionParser()
-    parser.add_option ("-i","--inputFile", help="input template file")
-    parser.add_option ("-o","--outputFile", help="where the model is defined")
-    parser.add_option ("-v","--verbose", help="Toggle verbose", action="store_true", default=False)
-    (opts, args) = parser.parse_args()
-    if not opts.inputFile : parser.error('Template not given')
-    inputFile  = opts.inputFile
-    outputFile = opts.outputFile if opts.outputFile else os.path.dirname(inputFile)+'/'+'mymodel.py'
-    verbose    = opts.verbose
-
-    if outputFile[0]=='/': outputFile = outputFile[1:]
-
-    #prepare the model
-    if os.path.exists(outputFile) :
-        if verbose : print "removing existing ouput '%s'"%outputFile
-        os.remove(outputFile)
-
     projectDir = os.path.dirname(os.path.abspath(__file__)).replace('/python','')
     dataDir = projectDir+'/data/'
-    values = {'data'    : asString(json.load(open(dataDir+'data.json'))),
-              'mmatrix' : asString(json.load(open(dataDir+'migrations.json'))),
-              'lower'   : lower,
-              'upper'   : upper,
-              'bg'      : getBackground(jsonfname=dataDir+'background.json')
+    defaultData = dataDir+'data.json'
+    defaultMig  = dataDir+'migrations.json'
+    defaultBkg  = dataDir+'background.json'
+    from optparse import OptionParser
+    parser = OptionParser()
+    parser.add_option ('-D', '--data',       default=defaultData, help="json data file")
+    parser.add_option ('-M', '--matrix',     default=defaultMig,  help="json migration matrix file")
+    parser.add_option ('-B', '--background', default=defaultBkg,  help="json background file")
+    parser.add_option ('-t', '--template',   help='input model template file')
+    parser.add_option ('-m', '--model',      help='where the model will be defined')
+    parser.add_option ('-v', '--verbose',    help='Toggle verbose', action='store_true', default=False)
+    (opts, args) = parser.parse_args()
+    if not opts.template : parser.error('Template not given')
+    jsonData      = opts.data
+    jsonMig       = opts.matrix
+    jsonBkg       = opts.background
+    templateFile  = opts.template
+    modelFile     = opts.model if opts.model else os.path.dirname(templateFile)+'/'+'mymodel.py'
+    verbose       = opts.verbose
+
+    if verbose :
+        print 'Options:'
+        print '\n'.join("%s : %s"%(v, str(eval(v))) for v in ['jsonData','jsonMig','jsonBkg',
+                                                              'templateFile','modelFile'])
+    if modelFile[0]=='/': modelFile = modelFile[1:]
+
+    #prepare the model
+    if os.path.exists(modelFile) :
+        if verbose : print "removing existing model '%s'"%modelFile
+        os.remove(modelFile)
+
+    values = {'data'    : asString(json.load(open(jsonData))),
+              'mmatrix' : asString(json.load(open(jsonMig))),
+              'lower'   : asString(lower),
+              'upper'   : asString(upper),
+              'bg'      : getBackground(jsonBkg)
               }
 
-    formatTemplate(inputFile, outputFile, values)
+    formatTemplate(templateFile, modelFile, values)
 
-    if verbose : print "importing model '%s'"%outputFile
-    mytemplate = __import__(os.path.basename(outputFile).replace('.py',''))
+    if verbose : print "importing model '%s'"%modelFile
+    mytemplate = __import__(os.path.basename(modelFile).replace('.py',''))
     mcmc = MCMC(mytemplate)
     mcmc.sample(nMCMC,burn=nBurn,thin=nThin)
 
