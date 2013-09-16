@@ -55,6 +55,10 @@ def formatTemplate(infile, outfile, values={}) :
 
 
 def getBackground(jsonfname='', variation='Nominal') :
+    """Read bkg from json file. Note that because we are using this to
+    fill in a template, we are returning a string, and not the actual
+    numerical values.
+    """
     nameBkg1 = 'BG'
     valuesBkg1 = str(json.load(open(jsonfname))[nameBkg1][variation])
     return "{ 'background1' : %s }" % valuesBkg1
