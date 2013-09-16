@@ -43,8 +43,8 @@ data        = 'array([14942.0869140625, 15100.28515625, 15082.591796875, 15215.5
 
 #Truth versus Reco Migration matrix from protos MC, 2011 7TeV charge asymmetry analysis (closure test)
 migrations  = 'array([[0.063770,0.022177,0.011848,0.007905],[0.022544,0.051560,0.026740,0.011981],[0.011556,0.026787,0.051118,0.022614],[0.007696,0.011584,0.021881,0.062564]])'
-truth_do    = '10000'
-truth_up    = '150000'
+truth_do    = '1000'
+truth_up    = '1500'
 ############################################
 
 def formatTemplate(infile, outfile, values={}) :
@@ -54,25 +54,10 @@ def formatTemplate(infile, outfile, values={}) :
     f.close()
 
 
-def addBG(jsonfile):
-    tmp_dict = {}
-    nominal = '{'
-    with open(jsonfile,'rb') as fp:
-        tmp_dict = json.load(fp)
-        print tmp_dict
-        for BG in tmp_dict:
-            nominal = nominal + '\"' +BG +'\":'
-            tmp_dict_bg = tmp_dict[BG]
-            print 'BG: %s'%BG
-            for Syst in tmp_dict_bg:
-                print '  Syst: %s'%(Syst)
-                print tmp_dict_bg[Syst]
-                if Syst=='Nominal':nominal = nominal + tmp_dict_bg[Syst] +','
-                
-    nominal += '}'
-    print '---->>>>>  ',nominal
-    return nominal
-
+def getBackground(jsonfname='', variation='Nominal') :
+    nameBkg1 = 'BG'
+    valuesBkg1 = str(json.load(open(jsonfname))[nameBkg1][variation])
+    return "{ 'background1' : %s }" % valuesBkg1
 
 if __name__ == "__main__":
     from optparse import OptionParser
@@ -98,7 +83,7 @@ if __name__ == "__main__":
               'mmatrix':migrations,
               'lower':truth_do,
               'upper':truth_up,
-              'bg':addBG(projectDir+'/data/background.json')
+              'bg':getBackground(jsonfname=projectDir+'/data/background.json')
               }
 
     formatTemplate(inputFile, outputFile, values)
