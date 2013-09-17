@@ -137,7 +137,10 @@ class pyFBU(object):
             print 'ERROR Template not given'
             sys.exit(0)
 
-        self.modelFile = self.modelFile if self.modelFile  else self.defaultModelFname(self.templateFile)
+        print 'model file  ',self.modelFile
+        print 'model Name  ',self.modelName
+
+        self.modelFile = self.defaultModelFname(self.templateFile)
 
         if self.verbose :
             print 'Options:'
@@ -168,7 +171,8 @@ class pyFBU(object):
         self.trace = self.mcmc.trace("truth")[:]
 
         #print 'model name : %s'%self.modelName
-        plot(self.mcmc,"Summary_%s.eps"%self.modelName)
+        plot(self.mcmc)
+        savefig("Summary_%s.eps"%self.modelName)
 
         #plt.hist(zip(*self.trace)[0],bins=100)
         #savefig("Summary_%s.eps"%self.modelName)
