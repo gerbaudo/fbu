@@ -7,13 +7,14 @@ from pymc import DiscreteUniform, Poisson, deterministic
 from numpy import array, empty
 
 #Data points of the distribution to unfold
-data = %(data)s
+data = array(%(data)s)
+bkgd = %(bg)s
 
 #This is the number of data bins
 nreco = len(data)
 
 #Migration matrix truth level -> reconstructed level
-migrations = %(mmatrix)s
+migrations = array(%(mmatrix)s)
 
 #define uniformely distributed variable truth, range betweem lower and upper, for nreco variables
 truth = DiscreteUniform('truth', lower=%(lower)s, upper=%(upper)s, doc='truth', size=nreco)
@@ -24,6 +25,8 @@ def unfold(truth=truth):
     out = empty(nreco)
     for r in xrange(nreco):
         tmp=0.
+        for b in bkgd:
+            tmp+=bkgd[b][r]
         for t in xrange(nreco):
             tmp += truth[t]*migrations[r][t]
         out[r:r+1] = tmp 
