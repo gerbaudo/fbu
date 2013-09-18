@@ -6,7 +6,10 @@
 # python runpyFBU.py 
 ###################
 
-import os
+import sys, os
+sys.path.append(os.getcwd()+'/python/')
+
+print os.getcwd()+'/python/'
 from pyFBU import pyFBU
 import computeAc
 import linearity
