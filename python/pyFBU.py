@@ -16,6 +16,8 @@ import json
 import os
 
 from pymc import MCMC
+from pymc import MAP
+from pymc import AdaptiveMetropolis
 from numpy import array,mean,std
 import matplotlib.pyplot as plt
 from pylab import savefig
@@ -137,7 +139,7 @@ class pyFBU(object):
             print 'ERROR Template not given'
             sys.exit(0)
 
-        self.modelFile = self.modelFile if self.modelFile  else self.defaultModelFname(self.templateFile)
+        self.modelFile = self.defaultModelFname(self.templateFile)
 
         if self.verbose :
             print 'Options:'
@@ -160,15 +162,17 @@ class pyFBU(object):
         if self.verbose : print "importing model '%s'"%self.modelFile
         mytemplate = __import__(os.path.basename(self.modelFile).replace('.py',''))
 
+        map_ = MAP( mytemplate )
+        map_.fit() 
+
         self.mcmc = MCMC(mytemplate)
+        self.mcmc.use_step_method(AdaptiveMetropolis, mytemplate.truth)
+
         self.mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         
 
         self.stats = self.mcmc.stats()
         self.trace = self.mcmc.trace("truth")[:]
 
-        #print 'model name : %s'%self.modelName
-        plot(self.mcmc,"Summary_%s.eps"%self.modelName)
-
-        #plt.hist(zip(*self.trace)[0],bins=100)
-        #savefig("Summary_%s.eps"%self.modelName)
+        plot(self.mcmc)
+        savefig("Summary_%s.eps"%self.modelName)
