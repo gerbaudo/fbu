@@ -1,0 +1,39 @@
+truth_2Aneg  = [107607.1484375, 105903.09375,  104783.25,     106159.7109375]
+#1.22594867453064793e+02,1.19481369060520578e+02,1.18089546471303620e+02,1.20210227411684059e+02
+
+truth_2Apos  = [101196.6015625, 104430.0859375, 106261.2421875, 109856.046875]
+#1.15274987935207932e+02, 1.17819494632787837e+02, 1.19755230050042698e+02, 1.24317986507842079e+02
+
+truth_4Aneg  = [111129.6953125, 106405.765625, 103566.5546875, 106280.671875]
+#1.26697891883296990e+02, 1.20048485813563957e+02, 1.16718343145939428e+02, 1.20678923239195186e+02
+
+truth_4Apos  = [98320.984375,  103217.484375, 106765.609375, 113482.25]
+#1.12019435347861645e+02, 1.16451427029312327e+02, 1.20323646680677726e+02, 1.28525524563347119e+02
+
+truth_6Aneg  = [115257.6328125, 106348.1875,   102175.75,     106562.6796875]
+#1.31582689874845101e+02, 1.19983523268158919e+02, 1.15150924561929159e+02, 1.21631629711826037e+02
+
+truth_6Apos  = [95524.4296875, 101831.375,    106707.835937, 117730.453125]
+#1.08854669451568697e+02, 1.14887592880031150e+02, 1.20258535235867782e+02, 1.33533079579333190e+02
+
+
+def computeAc(DeltaY):
+    Ac = ((float(DeltaY[2]) + float(DeltaY[3])) - (float(DeltaY[0]) + float(DeltaY[1]))) / ((float(DeltaY[2]) + float(DeltaY[3])) + (float(DeltaY[0]) + float(DeltaY[1])))
+    return Ac
+
+def computeAcList(fullList):
+    AcList = []
+    for i in fullList:
+        AcList.append(computeAc(i))
+    return AcList
+
+
+if __name__ == "__main__":
+    print 'asym 2A neg  %f'%computeAc(truth_2Aneg)
+    print 'asym 2A pos  %f'%computeAc(truth_2Apos)
+    print 'asym 4A neg  %f'%computeAc(truth_4Aneg)
+    print 'asym 4A pos  %f'%computeAc(truth_4Apos)
+    print 'asym 6A neg  %f'%computeAc(truth_6Aneg)
+    print 'asym 6A pos  %f'%computeAc(truth_6Apos)
+
+
