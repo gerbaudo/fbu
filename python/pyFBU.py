@@ -49,9 +49,6 @@ class pyFBU(object):
         self.jsonMig  = self.dataDir+'migrations.json' # json migration matrix file
         self.jsonBkg  = self.dataDir+'background.json' # json background file
 
-        # template file. If no templateFile given can not run
-        self.templateFile  = None
-
         # model name
         self.modelName     = 'mymodel'
 
@@ -96,9 +93,6 @@ class pyFBU(object):
     def setjsonBkg(self, value): self.jsonBkg = value
 
     #__________________________________________________________
-    def settemplateFile(self, value): self.templateFile = value
-
-    #__________________________________________________________
     def setmodelName(self, value): self.modelName = value
 
 
@@ -121,11 +115,6 @@ class pyFBU(object):
     #__________________________________________________________
     def run(self):
  
-        if self.templateFile == '' : 
-            print 'ERROR Template not given'
-            sys.exit(0)
-
-
         # Data points of the distribution to unfold
         data = array(json.load(open(self.jsonData)))
 
