@@ -36,7 +36,6 @@ if __name__ == "__main__":
     pyfbu.setupper(140000)
     pyfbu.setjsonMig(Dir+'data/migrations.json')
     pyfbu.setjsonBkg(Dir+'data/background.json')
-    pyfbu.settemplateFile(Dir+'python/unfold_template.py')
     pyfbu.setverbose(False)
     
     dataList = ['dataA6neg.json', 'dataA4neg.json', 'dataA2neg.json', 'dataA2pos.json', 'dataA4pos.json', 'dataA6pos.json']
