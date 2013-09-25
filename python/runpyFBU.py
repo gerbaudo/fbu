@@ -1,13 +1,8 @@
-#! /bin/env python
-###################
-# davide.gerbaudo@cern.ch clement.helsens@cern.ch, francesco.rubbo@cern.ch
-###################
-# usage:
-# python runpyFBU.py 
-###################
+#!/bin/env python
 
 import os
 from pyFBU import pyFBU
+from optparse import OptionParser
 
 #__________________________________________________________
 if __name__ == "__main__":
@@ -16,8 +11,8 @@ if __name__ == "__main__":
     defaultData = dataDir+'data.json'
     defaultMig = dataDir+'migrations.json'
     defaultBkg = dataDir+'background.json'
-    from optparse import OptionParser
-    parser = OptionParser()
+    usage = "usage: %prog -t python/unfold_template.py [options]"
+    parser = OptionParser(usage=usage)
     parser.add_option ('-D', '--data', default=defaultData, help="json data file")
     parser.add_option ('-M', '--matrix', default=defaultMig, help="json migration matrix file")
     parser.add_option ('-B', '--background', default=defaultBkg, help="json background file")
@@ -34,20 +29,17 @@ if __name__ == "__main__":
     verbose = opts.verbose
 
     pyfbu = pyFBU()
-    pyfbu.setnMCMC(100000)
-    pyfbu.setnBurn(1000)
-    pyfbu.setnThin(10)
-
-    pyfbu.setlower(70000)
-    pyfbu.setupper(140000)
-    #pyfbu.setprojectDir(value)
-    #pyfbu.setdataDir(value)
-    pyfbu.setjsonData(jsonData)
-    pyfbu.setjsonMig(jsonMig)
-    pyfbu.setjsonBkg(jsonBkg)
-    pyfbu.settemplateFile(templateFile)
-    pyfbu.setmodelName(modelName)
-    pyfbu.setverbose(verbose)
+    pyfbu.nMCMC        = 100000
+    pyfbu.nBurn        = 1000
+    pyfbu.nThin        = 10
+    pyfbu.lower        = 70000
+    pyfbu.upper        = 140000
+    pyfbu.jsonData     = jsonData
+    pyfbu.jsonMig      = jsonMig
+    pyfbu.jsonBkg      = jsonBkg
+    pyfbu.templateFile = templateFile
+    pyfbu.modelName    = modelName if modelName else pyfbu.modelName
+    pyfbu.verbose      = verbose
     
     pyfbu.run()
 

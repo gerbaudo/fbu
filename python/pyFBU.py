@@ -1,16 +1,3 @@
-#! /bin/env python
-###################
-# davide.gerbaudo@cern.ch clement.helsens@cern.ch, francesco.rubbo@cern.ch
-###################
-#
-# Class    pyFBU
-# Package  pyFBU
-#
-############################
-#
-# Main class to run pyFBU
-#
-#############################               
 import commands
 import json
 import os
@@ -25,26 +12,26 @@ from pymc.Matplot import plot
 
 
 class pyFBU(object):
+    """A class to perform a MCMC sampling for an unfolding model.
+    The model is specified with a template whose numerical values are
+    filled in reading the inputs from json values.
 
+    [more detailed description should be added here]
+
+    All configurable parameters are set to some default value, which
+    can be changed later on, but before calling the `run` method.
+    """
     #__________________________________________________________
     def __init__(self):
-
-        # MCMC default parameters
-        self.nMCMC = 100000 # N trials
+        self.templateFile  = None  #required
+        self.nMCMC = 100000 # N trials        [begin MCMC parameters]
         self.nBurn = 1000   # todo: describe
         self.nThin = 10     # todo: describe
-
-        # model default parameters (other numerical values read in from inputs)
-        self.lower = 1000 # lower sampling bound
-        self.upper = 1500 # upper sampling bound
-
-        # project directory
+        self.lower = 1000   # lower sampling bound
+        self.upper = 1500   # upper sampling bound
+        #                                     [begin numerical parameters]
         self.projectDir = os.path.dirname(os.path.abspath(__file__)).replace('/python','')
-
-        # data directory
         self.dataDir = self.projectDir+'/data/'
-
-        # load default example
         self.jsonData = self.dataDir+'data.json'       # json data file
         self.jsonMig  = self.dataDir+'migrations.json' # json migration matrix file
         self.jsonBkg  = self.dataDir+'background.json' # json background file
@@ -98,6 +85,7 @@ class pyFBU(object):
 
     #__________________________________________________________
     def setverbose(self, value): self.verbose = value
+
 
     #__________________________________________________________
     def asString(self, value) : return str(value)
@@ -159,8 +147,6 @@ class pyFBU(object):
         self.mcmc = mc.MCMC( model )
         self.mcmc.use_step_method(mc.AdaptiveMetropolis, truth)
         self.mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
-        
-
         self.stats = self.mcmc.stats()
         self.trace = self.mcmc.trace("truth")[:]
 
