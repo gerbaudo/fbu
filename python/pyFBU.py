@@ -1,14 +1,3 @@
-#!/bin/env python
-###################
-#
-# Class    pyFBU
-# Package  pyFBU
-#
-############################
-#
-# Main class to run pyFBU
-#
-#############################               
 import commands
 import json
 import os
