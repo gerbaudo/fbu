@@ -77,41 +77,31 @@ class pyFBU(object):
     def defaultModelFname(self, templateFname='') :
         return os.path.dirname(os.path.abspath(templateFname))+'/'+self.modelName+'.py'
     #__________________________________________________________
-    def run(self): 
-        if self.templateFile == '' : 
-            print 'ERROR Template not given'
-            sys.exit(0)
-
-        self.modelFile = self.modelFile if self.modelFile  else self.defaultModelFname(self.templateFile)
-
+    def run(self):
+        assert self.templateFile, "A template is required"
+        self.modelFile = self.modelFile if self.modelFile else self.defaultModelFname(self.templateFile)
         if self.verbose :
             print 'Options:'
             print '\n'.join("%s : %s"%(v, str(eval(v))) for v in ['jsonData','jsonMig','jsonBkg',
                                                                   'templateFile','modelFile'])
-        #prepare the model
-        if os.path.exists(self.modelFile) :
-            if self.verbose : print "removing existing model '%s'"%self.modelFile
-            os.remove(self.modelFile)
-
+        def removeExistingModelFile(filename, verbose) :
+            if os.path.exists(filename) :
+                if verbose : print "removing existing model '%s'"%filename
+                os.remove(filename)
+        removeExistingModelFile(self.modelFile, self.verbose)
         values = {'data'    : self.asString(json.load(open(self.jsonData))),
                   'mmatrix' : self.asString(json.load(open(self.jsonMig))),
                   'lower'   : self.asString(self.lower),
                   'upper'   : self.asString(self.upper),
                   'bg'      : self.getBackground(self.jsonBkg)
                   }
-
         self.formatTemplate(self.templateFile, self.modelFile, values)
-
         if self.verbose : print "importing model '%s'"%self.modelFile
         mytemplate = __import__(os.path.basename(self.modelFile).replace('.py',''))
 
         self.mcmc = MCMC(mytemplate)
         self.mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
-        
-
         self.stats = self.mcmc.stats()
         self.trace = self.mcmc.trace("truth")[:]
-
-
         plot(self.mcmc,"Summary_%s.eps"%self.modelName)
     #__________________________________________________________
