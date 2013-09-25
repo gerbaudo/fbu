@@ -63,57 +63,14 @@ class pyFBU(object):
         self.mcmc  = None
         self.stats = None
         self.trace = None
-
-    #__________________________________________________________
-    def setnMCMC(self, value): self.nMCMC = value
-    #__________________________________________________________
-    def setnBurn(self, value): self.nBurn = value
-    #__________________________________________________________
-    def setnThin(self, value): self.nThin = value
-
-
-    #__________________________________________________________
-    def setlower(self, value): self.lower = value
-    #__________________________________________________________
-    def setupper(self, value): self.upper = value
-    #__________________________________________________________
-    def setBounds(self, low, up): 
-        self.lower = low
-        self.upper = up
-
-    #__________________________________________________________
-    def setprojectDir(self, value): self.projectDir = value
-
-    #__________________________________________________________
-    def setdataDir(self, value): self.dataDir = value
-
-    #__________________________________________________________
-    def setjsonData(self, value): self.jsonData = value
-    #__________________________________________________________
-    def setjsonMig(self, value): self.jsonMig = value
-    #__________________________________________________________
-    def setjsonBkg(self, value): self.jsonBkg = value
-
-    #__________________________________________________________
-    def settemplateFile(self, value): self.templateFile = value
-
-    #__________________________________________________________
-    def setmodelName(self, value): self.modelName = value
-
-
-    #__________________________________________________________
-    def setverbose(self, value): self.verbose = value
-
     #__________________________________________________________
     def asString(self, value) : return str(value)
-
     #__________________________________________________________
     def formatTemplate(self, infile, outfile, values={}) :
         f=open(outfile, 'w')
         f.write(open(infile).read()%values)
         f.flush()
         f.close()
-
     #__________________________________________________________
     def getBackground(self, jsonfname='', variation='Nominal') :
         """Read bkg from json file. Note that because we are using this to
@@ -123,13 +80,9 @@ class pyFBU(object):
         nameBkg1 = 'BG'
         valuesBkg1 = str(json.load(open(jsonfname))[nameBkg1][variation])
         return "{ 'background1' : %s }" % valuesBkg1
-
-
     #__________________________________________________________
     def defaultModelFname(self, templateFname='') :
         return os.path.dirname(os.path.abspath(templateFname))+'/'+self.modelName+'.py'
-
-
     #__________________________________________________________
     def run(self):
  

@@ -34,20 +34,17 @@ if __name__ == "__main__":
     verbose = opts.verbose
 
     pyfbu = pyFBU()
-    pyfbu.setnMCMC(100000)
-    pyfbu.setnBurn(1000)
-    pyfbu.setnThin(10)
-
-    pyfbu.setlower(70000)
-    pyfbu.setupper(140000)
-    #pyfbu.setprojectDir(value)
-    #pyfbu.setdataDir(value)
-    pyfbu.setjsonData(jsonData)
-    pyfbu.setjsonMig(jsonMig)
-    pyfbu.setjsonBkg(jsonBkg)
-    pyfbu.settemplateFile(templateFile)
-    if modelName : pyfbu.modelName = modelName
-    pyfbu.setverbose(verbose)
+    pyfbu.nMCMC        = 100000
+    pyfbu.nBurn        = 1000
+    pyfbu.nThin        = 10
+    pyfbu.lower        = 70000
+    pyfbu.upper        = 140000
+    pyfbu.jsonData     = jsonData
+    pyfbu.jsonMig      = jsonMig
+    pyfbu.jsonBkg      = jsonBkg
+    pyfbu.templateFile = templateFile
+    pyfbu.modelName    = modelName if modelName else pyfbu.modelName
+    pyfbu.verbose      = verbose
     
     pyfbu.run()
 
