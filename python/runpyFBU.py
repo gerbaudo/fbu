@@ -46,7 +46,7 @@ if __name__ == "__main__":
     pyfbu.setjsonMig(jsonMig)
     pyfbu.setjsonBkg(jsonBkg)
     pyfbu.settemplateFile(templateFile)
-    pyfbu.setmodelName(modelName)
+    if modelName : pyfbu.modelName = modelName
     pyfbu.setverbose(verbose)
     
     pyfbu.run()
