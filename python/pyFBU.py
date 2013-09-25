@@ -23,41 +23,34 @@ from pymc.Matplot import plot
 
 
 class pyFBU(object):
+    """A class to perform a MCMC sampling for an unfolding model.
+    The model is specified with a template whose numerical values are
+    filled in reading the inputs from json values.
 
+    [more detailed description should be added here]
+
+    All configurable parameters are set to some default value, which
+    can be changed later on, but before calling the `run` method.
+    """
     #__________________________________________________________
     def __init__(self):
-
-        # MCMC default parameters
-        self.nMCMC = 100000 # N trials
+        self.templateFile  = None  #required
+        self.nMCMC = 100000 # N trials        [begin MCMC parameters]
         self.nBurn = 1000   # todo: describe
         self.nThin = 10     # todo: describe
-
-        # model default parameters (other numerical values read in from inputs)
-        self.lower = 1000 # lower sampling bound
-        self.upper = 1500 # upper sampling bound
-
-        # project directory
+        self.lower = 1000   # lower sampling bound
+        self.upper = 1500   # upper sampling bound
+        #                                     [begin numerical parameters]
         self.projectDir = os.path.dirname(os.path.abspath(__file__)).replace('/python','')
-
-        # data directory
         self.dataDir = self.projectDir+'/data/'
-
-        # load default example
         self.jsonData = self.dataDir+'data.json'       # json data file
         self.jsonMig  = self.dataDir+'migrations.json' # json migration matrix file
         self.jsonBkg  = self.dataDir+'background.json' # json background file
 
-        # template file. If no templateFile given can not run
-        self.templateFile  = None
 
-        # model name
         self.modelName     = 'mymodel'
-
-        # model file (will change the template file to this name). If no modelFile given, will use the default name
-        self.modelFile     = None
-
-        # verbose
-        self.verbose       = False # Toggle verbose
+        self.modelFile     = ''
+        self.verbose       = False
 
         # mcmc model and statistics
         self.mcmc  = None
@@ -84,8 +77,7 @@ class pyFBU(object):
     def defaultModelFname(self, templateFname='') :
         return os.path.dirname(os.path.abspath(templateFname))+'/'+self.modelName+'.py'
     #__________________________________________________________
-    def run(self):
- 
+    def run(self): 
         if self.templateFile == '' : 
             print 'ERROR Template not given'
             sys.exit(0)
@@ -120,8 +112,6 @@ class pyFBU(object):
         self.stats = self.mcmc.stats()
         self.trace = self.mcmc.trace("truth")[:]
 
-        #print 'model name : %s'%self.modelName
-        plot(self.mcmc,"Summary_%s.eps"%self.modelName)
 
-        #plt.hist(zip(*self.trace)[0],bins=100)
-        #savefig("Summary_%s.eps"%self.modelName)
+        plot(self.mcmc,"Summary_%s.eps"%self.modelName)
+    #__________________________________________________________
