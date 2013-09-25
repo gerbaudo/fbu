@@ -15,10 +15,10 @@ import commands
 import json
 import os
 
-from pymc import MCMC
-from pymc import MAP
-from pymc import AdaptiveMetropolis
-from numpy import array,mean,std
+import pymc as mc
+from numpy import array,mean,std, empty
+
+
 import matplotlib.pyplot as plt
 from pylab import savefig
 from pymc.Matplot import plot
@@ -49,14 +49,8 @@ class pyFBU(object):
         self.jsonMig  = self.dataDir+'migrations.json' # json migration matrix file
         self.jsonBkg  = self.dataDir+'background.json' # json background file
 
-        # template file. If no templateFile given can not run
-        self.templateFile  = None
-
         # model name
         self.modelName     = 'mymodel'
-
-        # model file (will change the template file to this name). If no modelFile given, will use the default name
-        self.modelFile     = None
 
         # verbose
         self.verbose       = False # Toggle verbose
@@ -65,6 +59,8 @@ class pyFBU(object):
         self.mcmc  = None
         self.stats = None
         self.trace = None
+        
+
 
     #__________________________________________________________
     def setnMCMC(self, value): self.nMCMC = value
@@ -97,9 +93,6 @@ class pyFBU(object):
     def setjsonBkg(self, value): self.jsonBkg = value
 
     #__________________________________________________________
-    def settemplateFile(self, value): self.templateFile = value
-
-    #__________________________________________________________
     def setmodelName(self, value): self.modelName = value
 
 
@@ -110,64 +103,61 @@ class pyFBU(object):
     def asString(self, value) : return str(value)
 
     #__________________________________________________________
-    def formatTemplate(self, infile, outfile, values={}) :
-        f=open(outfile, 'w')
-        f.write(open(infile).read()%values)
-        f.flush()
-        f.close()
-
-    #__________________________________________________________
     def getBackground(self, jsonfname='', variation='Nominal') :
         """Read bkg from json file. Note that because we are using this to
         fill in a template, we are returning a string, and not the actual
         numerical values.
         """
         nameBkg1 = 'BG'
-        valuesBkg1 = str(json.load(open(jsonfname))[nameBkg1][variation])
-        return "{ 'background1' : %s }" % valuesBkg1
-
-
-    #__________________________________________________________
-    def defaultModelFname(self, templateFname='') :
-        return os.path.dirname(os.path.abspath(templateFname))+'/'+self.modelName+'.py'
-
+        valuesBkg1 = json.load(open(jsonfname))[nameBkg1][variation]
+        return { 'background1' : valuesBkg1 }
 
     #__________________________________________________________
     def run(self):
  
-        if self.templateFile == '' : 
-            print 'ERROR Template not given'
-            sys.exit(0)
+        # Data points of the distribution to unfold
+        data = array(json.load(open(self.jsonData)))
 
-        self.modelFile = self.defaultModelFname(self.templateFile)
+        # Background distribution
+        bkgd = self.getBackground(self.jsonBkg)
 
-        if self.verbose :
-            print 'Options:'
-            print '\n'.join("%s : %s"%(v, str(eval(v))) for v in ['jsonData','jsonMig','jsonBkg',
-                                                                  'templateFile','modelFile'])
-        #prepare the model
-        if os.path.exists(self.modelFile) :
-            if self.verbose : print "removing existing model '%s'"%self.modelFile
-            os.remove(self.modelFile)
+        #This is the number of data bins
+        nreco = len(data)
 
-        values = {'data'    : self.asString(json.load(open(self.jsonData))),
-                  'mmatrix' : self.asString(json.load(open(self.jsonMig))),
-                  'lower'   : self.asString(self.lower),
-                  'upper'   : self.asString(self.upper),
-                  'bg'      : self.getBackground(self.jsonBkg)
-                  }
+        #Migration matrix truth level -> reconstructed level
+        migrations = array(json.load(open(self.jsonMig)))
 
-        self.formatTemplate(self.templateFile, self.modelFile, values)
+        #define uniformely distributed variable truth, range betweem lower and upper, for nreco variables
+        truth = mc.DiscreteUniform('truth', lower=self.lower, upper=self.upper, doc='truth', size=nreco)
 
-        if self.verbose : print "importing model '%s'"%self.modelFile
-        mytemplate = __import__(os.path.basename(self.modelFile).replace('.py',''))
+        #This is where the FBU method is actually implemented
+        #__________________________________________________________
+        @mc.deterministic(plot=False)
+        def unfold(truth=truth):
+            out = empty(nreco)
+            for r in xrange(nreco):
+                tmp=0.
+                for b in bkgd:
+                    tmp+=bkgd[b][r]
+                for t in xrange(nreco):
+                    tmp += truth[t]*migrations[r][t]
+                    out[r:r+1] = tmp 
+            return out
 
-        map_ = MAP( mytemplate )
+        #This is the unfolded distribution
+        unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=nreco)
+
+        # Define the model using the model class
+        model = mc.Model([unfolded, unfold, truth])
+
+        # Call MAP before MCMC to find good starting MCMC values
+        map_ = mc.MAP( model )
         map_.fit() 
 
-        self.mcmc = MCMC(mytemplate)
-        self.mcmc.use_step_method(AdaptiveMetropolis, mytemplate.truth)
-
+        
+        #Define the MCMC model
+        self.mcmc = mc.MCMC( model )
+        self.mcmc.use_step_method(mc.AdaptiveMetropolis, truth)
         self.mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         
 
