@@ -1,6 +1,4 @@
-#! /bin/env python
-###################
-# davide.gerbaudo@cern.ch clement.helsens@cern.ch, francesco.rubbo@cern.ch
+#!/bin/env python
 ###################
 # usage:
 # python runpyFBU.py 
