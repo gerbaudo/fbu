@@ -8,7 +8,8 @@ How to contribute:
     git commit -m "some file, etc"
     git push origin some-project
 
-For more details, see https://www.atlassian.com/git/workflows#!workflow-feature-branch
+For more details, see [a simple git branching model](https://gist.github.com/jbenet/ee6c9ac48068889b0912)
+or [a detailed description of the feature-branch](https://www.atlassian.com/git/workflows#!workflow-feature-branch)
 
 - recommendations about commit messages
 Follow Linus' guidelines: one short descriptive line, followed by a
