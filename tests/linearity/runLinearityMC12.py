@@ -33,8 +33,8 @@ if __name__ == "__main__":
     pyfbu.setnBurn = 1000
     pyfbu.setnThin = 10
     
-    pyfbu.lower = 70000
-    pyfbu.upper = 140000
+    pyfbu.lower = 400000
+    pyfbu.upper = 900000
 
     pyfbu.jsonMig = Dir+'data/mc12/migrations.json'
     pyfbu.jsonBkg = Dir+'data/mc12/background.json'
