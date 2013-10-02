@@ -28,15 +28,16 @@ def Integral(array, up, down):
 if __name__ == "__main__":
     Dir = '/afs/cern.ch/user/h/helsens/TopWork/Unfolding/fbu/'
     pyfbu = pyFBU()
-    pyfbu.setnMCMC(100000)
-    pyfbu.setnBurn(1000)
-    pyfbu.setnThin(10)
+    pyfbu.nMCMC = 100000
+    pyfbu.nBurn = 1000
+    pyfbu.nThin = 10
     
-    pyfbu.setlower(70000)
-    pyfbu.setupper(140000)
-    pyfbu.setjsonMig(Dir+'data/migrations.json')
-    pyfbu.setjsonBkg(Dir+'data/background.json')
-    pyfbu.setverbose(False)
+    pyfbu.lower = 70000
+    pyfbu.upper = 140000
+
+    pyfbu.jsonMig = Dir+'data/mc11/migrations.json'
+    pyfbu.jsonBkg = Dir+'data/mc11/background.json'
+    pyfbu.verbose = False
     
     dataList = ['dataA6neg.json', 'dataA4neg.json', 'dataA2neg.json', 'dataA2pos.json', 'dataA4pos.json', 'dataA6pos.json']
     meanAc = []
@@ -45,8 +46,8 @@ if __name__ == "__main__":
     TestPassed = True
 
     for data in dataList:
-        pyfbu.setjsonData(Dir+'data/'+data)
-        pyfbu.setmodelName(data.replace('.json',''))
+        pyfbu.jsonData  = Dir+'data/mc11/'+data
+        pyfbu.modelName = data.replace('.json','')
         pyfbu.run()
         trace = pyfbu.trace
         AcList  = computeAc.computeAcList(trace)
