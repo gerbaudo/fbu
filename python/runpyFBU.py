@@ -18,6 +18,7 @@ if __name__ == "__main__":
     parser.add_option ('-B', '--background', default=defaultBkg, help="json background file")
     parser.add_option ('-t', '--template', help='input model template file')
     parser.add_option ('-m', '--model', help='name of the model. Models are automatically created under the same directory as the template')
+    parser.add_option ('-s', '--seed', default=-1, help='random seed value. should be greater than -1 to ues a different random seed. Default is -1, so same random seed')
     parser.add_option ('-v', '--verbose', help='Toggle verbose', action='store_true', default=False)
     (opts, args) = parser.parse_args()
     if not opts.template : parser.error('Template not given')
@@ -26,6 +27,7 @@ if __name__ == "__main__":
     jsonBkg = opts.background
     templateFile = opts.template
     modelName = opts.model
+    rndseed = opts.seed
     verbose = opts.verbose
 
     pyfbu = pyFBU()
@@ -39,6 +41,7 @@ if __name__ == "__main__":
     pyfbu.jsonBkg      = jsonBkg
     pyfbu.templateFile = templateFile
     pyfbu.modelName    = modelName if modelName else pyfbu.modelName
+    pyfbu.rndseed      = int(rndseed)
     pyfbu.verbose      = verbose
     
     pyfbu.run()

@@ -38,6 +38,9 @@ if __name__ == "__main__":
 
     pyfbu.jsonMig = Dir+'data/mc12/migrations.json'
     pyfbu.jsonBkg = Dir+'data/mc12/background.json'
+
+    #pyfbu.rndseed = 0
+
     pyfbu.verbose = False
     
     dataList = ['dataA6neg.json', 'dataA4neg.json', 'dataA2neg.json', 'dataA2pos.json', 'dataA4pos.json', 'dataA6pos.json']
@@ -51,6 +54,9 @@ if __name__ == "__main__":
         pyfbu.modelName = data.replace('.json','')
         pyfbu.run()
         trace = pyfbu.trace
+
+        np.save('outputFile'+data.replace('.json',''),trace)
+
         AcList  = computeAc.computeAcList(trace)
         AcArray = np.array(AcList)
         meanAc.append(np.mean(AcArray))

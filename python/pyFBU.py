@@ -3,7 +3,7 @@ import json
 import os
 
 import pymc as mc
-from numpy import array,mean,std, empty
+from numpy import array,mean,std, empty, random
 
 import matplotlib.pyplot as plt
 from pylab import savefig
@@ -38,6 +38,9 @@ class pyFBU(object):
         # model name
         self.modelName     = 'mymodel'
 
+        # random seed
+        self.rndseed = -1
+
         # verbose
         self.verbose       = False # Toggle verbose
 
@@ -49,6 +52,11 @@ class pyFBU(object):
  
     #__________________________________________________________
     def asString(self, value) : return str(value)
+
+    #__________________________________________________________
+    def fluctuate(self, data):
+        random.seed(self.rndseed)
+        return random.poisson(data)
 
     #__________________________________________________________
     def getBackground(self, jsonfname='', variation='Nominal') :
@@ -65,6 +73,9 @@ class pyFBU(object):
  
         # Data points of the distribution to unfold
         data = array(json.load(open(self.jsonData)))
+
+        if self.rndseed>=0:
+            data = self.fluctuate(data)
 
         # Background distribution
         bkgd = self.getBackground(self.jsonBkg)
