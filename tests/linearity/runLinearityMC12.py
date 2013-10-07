@@ -3,13 +3,13 @@
 # davide.gerbaudo@cern.ch clement.helsens@cern.ch, francesco.rubbo@cern.ch
 ###################
 # usage:
-# python runpyFBU.py 
+# python runLinearityMC12.py 
 ###################
 
 import sys, os
 sys.path.append(os.getcwd()+'/python/')
+sys.path.append(os.getcwd()+'/priors/')
 
-print os.getcwd()+'/python/'
 from pyFBU import pyFBU
 import computeAc
 import linearity
