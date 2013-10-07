@@ -4,6 +4,11 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 from math import sqrt
+import os
+from utils import array2json, json2array
+
+
+regenerate = True
 
 def generateTruthSpectrum(offset=100.0, scale=500.0, nbkg=1e6, nsig=1e5) :
     """Generate pseudo-events with an observable in [offset, scale].
@@ -24,37 +29,52 @@ def smear(x, a=0.5, b=0.1) :
     sigma = a*sqrt(x) + b*x
     return x+np.random.normal(loc=0.0, scale=sigma)
 
-sigPlusBkg = generateTruthSpectrum()
-spbSmeared = [smear(x) for x in sigPlusBkg]
-numBins = 50
+jsonDir = 'data/bump/'
+jsonTruthFname  = jsonDir+'truth.json'
+jsonSmearFname  = jsonDir+'reco.json'
+jsonResMatFname = jsonDir+'resMat.json'
 
-nBinsTruth, truthMin, truthMax = 50, 500.0, 4500.0
-nBinsReco,  recoMin,  recoMax  = 50, 500.0, 4500.0
-histTruth, binsTruth        = np.histogram(sigPlusBkg, bins=nBinsTruth, range=(truthMin, truthMax))
-histReco,  binsReco         = np.histogram(spbSmeared, bins=nBinsReco, range=(recoMin, recoMax))
-respHist,  xedges, yedges   = np.histogram2d(sigPlusBkg, spbSmeared, bins=(nBinsTruth, nBinsReco),
-                                             range=((truthMin, truthMax), (recoMin,  recoMax)))
 def normalized(mat) :
     mat = mat.astype(float)
     return mat / mat.sum()
-respMat = normalized(respHist)
-print respHist
-print respMat
 
-def plotTruthAndReco(histT, binsT, histR, binsR, outfname) :
-    def getWidth(bins) : return bins[1] - bins[0]
-    plt.figure()
-    plt.bar(binsT[:-1], histT, color='b', width=getWidth(binsT), alpha=0.15)
-    plt.bar(binsR[:-1], histR, color='r', width=getWidth(binsR), alpha=0.15)
-    plt.savefig(outfname)
+def generateAndPlot() :
+    sigPlusBkg = generateTruthSpectrum()
+    spbSmeared = np.array([smear(x) for x in sigPlusBkg])
+    numBins = 50
+    nBinsTruth, truthMin, truthMax = 50, 500.0, 4500.0
+    nBinsReco,  recoMin,  recoMax  = 50, 500.0, 4500.0
+    histTruth, binsTruth        = np.histogram(sigPlusBkg, bins=nBinsTruth, range=(truthMin, truthMax))
+    histReco,  binsReco         = np.histogram(spbSmeared, bins=nBinsReco, range=(recoMin, recoMax))
+    respHist,  xedges, yedges   = np.histogram2d(sigPlusBkg, spbSmeared, bins=(nBinsTruth, nBinsReco),
+                                                 range=((truthMin, truthMax), (recoMin,  recoMax)))
+    respMat = normalized(respHist)
+    def plotTruthAndReco(histT, binsT, histR, binsR, outfname) :
+        def getWidth(bins) : return bins[1] - bins[0]
+        plt.figure()
+        plt.bar(binsT[:-1], histT, color='b', width=getWidth(binsT), alpha=0.15)
+        plt.bar(binsR[:-1], histR, color='r', width=getWidth(binsR), alpha=0.15)
+        plt.savefig(outfname)
+    def plotRespMatrix(respMatrix, xedges, yedges, outfname) :
+        from matplotlib.colors import LogNorm
+        extent = [yedges[0], yedges[-1], xedges[0], xedges[-1]]
+        plt.figure()
+        plt.imshow(respMatrix, extent=extent, interpolation='nearest', norm=LogNorm(), origin='lower')
+        plt.colorbar()
+        plt.savefig(outfname)
+    plotTruthAndReco(histTruth, binsTruth, histReco, binsReco, 'fallingExp_withBump.png')
+    plotRespMatrix(respHist, xedges, yedges, 'responseMatrix.png')
+    return histTruth, histReco, respMat
 
-def plotRespMatrix(respMatrix, xedges, yedges, outfname) :
-    from matplotlib.colors import LogNorm
-    extent = [yedges[0], yedges[-1], xedges[0], xedges[-1]]
-    plt.figure()
-    plt.imshow(respMatrix, extent=extent, interpolation='nearest', norm=LogNorm(), origin='lower')
-    plt.colorbar()
-    plt.savefig(outfname)
-
-plotTruthAndReco(histTruth, binsTruth, histReco, binsReco, 'fallingExp_withBump.png')
-plotRespMatrix(respHist, xedges, yedges, 'responseMatrix.png')
+histTruth, histReco, respMat = None, None, None
+if regenerate :
+    histTruth, histReco, respMat = generateAndPlot()
+    if not os.path.isdir(jsonDir) : os.path.mkdir(jsonDir)
+    for a,f in [(histTruth, jsonTruthFname),
+                (histReco,  jsonSmearFname),
+                (respMat,   jsonResMatFname)] :
+        array2json(a,f)
+else :
+    histTruth  = json2array(jsonTruthFname)
+    histReco   = json2array(jsonSmearFname),
+    respMat    = json2array(jsonResMatFname)
