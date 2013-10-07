@@ -10,10 +10,10 @@ def Tikonov_factory(nreco=4, refcurv=6.1e05,alpha=1e-8, t_l=10, t_h=1000):
             if val>high or val<low:
                 return -numpy.inf
 
-        tikonov = 0.
-        for ii in xrange(1,nreco-1):
-            tikonov += (value[ii+1]-2*value[ii]+value[ii-1])**2
-        deltaCurv = fabs(tikonov-refcurv)
+        def computeCurvature(bin): return value[bin-1]-2.0*value[bin]+value[bin+1]
+        curvature = sum([c*c for c in map(computeCurvature,range(1,nreco-1))])
+
+        deltaCurv = fabs(curvature-refcurv)
         return -deltaCurv*alpha
 
     return truth
