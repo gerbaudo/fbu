@@ -78,8 +78,8 @@ class pyFBU(object):
         #define uniformely distributed variable truth, range betweem lower and upper, for nreco variables
         truth = mc.DiscreteUniform('truth', lower=self.lower, upper=self.upper, doc='truth', size=nreco)
 
-#        import Tikonov
-#        truth = Tikonov.Tikonov_factory(nreco, 6.1e05, 1e-8, self.lower, self.upper)
+#        import Tikhonov
+#        truth = Tikhonov.Tikhonov_factory(nreco, 6.1e05, 1e-8, self.lower, self.upper)
 
 #        import DiscreteUniform
 #        truth = DiscreteUniform.myDiscreteUniform_factory(4, self.lower, self.upper)
