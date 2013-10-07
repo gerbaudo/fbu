@@ -36,6 +36,8 @@ if __name__ == "__main__":
     pyfbu.lower = 400000
     pyfbu.upper = 900000
 
+    #pyfbu.rndseed = 0
+
     data = 'dataA2pos.json'
 
     pyfbu.jsonMig = Dir+'data/mc12/migrations.json'
