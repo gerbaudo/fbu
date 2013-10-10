@@ -81,8 +81,8 @@ else :
     respMat    = json2array(jsonResMatFname)
 
 pyfbu = pyFBU()
-pyfbu.nMCMC        = 100000
-pyfbu.nBurn        = 1000
+pyfbu.nMCMC        = 1000
+pyfbu.nBurn        = 100
 pyfbu.nThin        = 10
 pyfbu.lower        = 70000
 pyfbu.upper        = 140000
