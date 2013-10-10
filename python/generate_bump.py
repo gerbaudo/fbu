@@ -88,9 +88,6 @@ pyfbu.lower        = 70000
 pyfbu.upper        = 140000
 pyfbu.jsonData     = jsonSmearFname
 pyfbu.jsonMig      = jsonResMatFname
-pyfbu.jsonBkg      = '' # this shouldnt be a requirement; pass [0.] ?
-pyfbu.templateFile = '' # templateFile  ?
-pyfbu.modelName    = '' # modelName if modelName else pyfbu.modelName ? I thought this wasn't necessary anymore
 pyfbu.verbose      = True # verbose ? will be on cmd-line
 
 pyfbu.run()
