@@ -7,10 +7,10 @@ from optparse import OptionParser
 #__________________________________________________________
 if __name__ == "__main__":
     projectDir = os.path.dirname(os.path.abspath(__file__)).replace('/python','')
-    dataDir = projectDir+'/data/'
+    dataDir = projectDir+'/data/mc11/'
     defaultData = dataDir+'data.json'
-    defaultMig = dataDir+'migrations.json'
-    defaultBkg = dataDir+'background.json'
+    defaultMig  = dataDir+'migrations.json'
+    defaultBkg  = dataDir+'background.json'
     usage = "usage: %prog -t python/unfold_template.py [options]"
     parser = OptionParser(usage=usage)
     parser.add_option ('-D', '--data', default=defaultData, help="json data file")
