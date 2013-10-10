@@ -49,6 +49,7 @@ def generateAndPlot() :
     respHist,  xedges, yedges   = np.histogram2d(sigPlusBkg, spbSmeared, bins=(nBinsTruth, nBinsReco),
                                                  range=((truthMin, truthMax), (recoMin,  recoMax)))
     respMat = normalized(respHist)
+    respMat = np.flipud(respMat) # histogram2d returns the y axis reversed (see docs)
     def plotTruthAndReco(histT, binsT, histR, binsR, outfname) :
         def getWidth(bins) : return bins[1] - bins[0]
         plt.figure()
