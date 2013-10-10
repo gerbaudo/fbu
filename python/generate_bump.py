@@ -8,8 +8,6 @@ import os
 from utils import array2json, json2array
 from pyFBU import pyFBU
 
-regenerate = True
-
 def generateTruthSpectrum(offset=100.0, scale=500.0, nbkg=1e6, nsig=1e5) :
     """Generate pseudo-events with an observable in [offset, scale].
     The observable spectrum is inspired to the one expected for a
@@ -33,6 +31,8 @@ jsonDir = 'data/bump/'
 jsonTruthFname  = jsonDir+'truth.json'
 jsonSmearFname  = jsonDir+'reco.json'
 jsonResMatFname = jsonDir+'resMat.json'
+
+regenerate = not os.path.exists(jsonResMatFname)
 
 def normalized(mat) :
     mat = mat.astype(float)
