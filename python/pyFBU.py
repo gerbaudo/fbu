@@ -26,14 +26,15 @@ class pyFBU(object):
         self.lower = 1000   # lower sampling bound
         self.upper = 1500   # upper sampling bound
         #                                     [begin numerical parameters]
-        self.jsonData = None # json data file
-        self.jsonMig  = None # json migration matrix file
-        self.jsonBkg  = None # json background file
-        self.rndseed  = -1
-        self.mcmc     = None # clarify these attributes (better names? required by pymc?)
-        self.stats    = None
-        self.trace    = None
-        self.verbose = False
+        self.jsonData  = None # json data file
+        self.jsonMig   = None # json migration matrix file
+        self.jsonBkg   = None # json background file
+        self.rndseed   = -1
+        self.mcmc      = None # clarify these attributes (better names? required by pymc?)
+        self.stats     = None
+        self.trace     = None
+        self.modelName = 'mymodel' #model name, will be used to save plots with a given name 
+        self.verbose   = False
     #__________________________________________________________
     def fluctuate(self, data):
         random.seed(self.rndseed)
@@ -51,19 +52,28 @@ class pyFBU(object):
         data = array(json.load(open(self.jsonData)))
         data = self.fluctuate(data) if self.rndseed>=0 else data
         bkgd = self.getBackground(self.jsonBkg) if self.jsonBkg else None
+
+        print data
+        print bkgd
+
         nreco = len(data)
         migrations = array(json.load(open(self.jsonMig)))
+
+        print migrations
+
+
         truth = mc.DiscreteUniform('truth',
                                    lower=self.lower, upper=self.upper,
                                    doc='truth', size=nreco)
+
+
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
         def unfold(truth=truth):
             out = empty(nreco)
             for r in xrange(nreco):
-                out[r] = (sum(b[r] for b in bkgd.values()) if bkgd else 0.0
-                          +
-                          sum(truth[t]*migrations[r][t] for t in xrange(nreco)))
+                out[r] =  sum(b[r] for b in bkgd.values()) if bkgd else 0.0
+                out[r] += sum(truth[t]*migrations[r][t] for t in xrange(nreco))
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=nreco)
@@ -77,4 +87,4 @@ class pyFBU(object):
         self.trace = self.mcmc.trace("truth")[:]
 
         plot(self.mcmc)
-        savefig("pyfbu_summary.eps")
+        savefig("Summary_%s.eps"%self.modelName)
