@@ -26,24 +26,18 @@ class pyFBU(object):
         self.lower = 1000   # lower sampling bound
         self.upper = 1500   # upper sampling bound
         #                                     [begin numerical parameters]
-        self.projectDir = os.path.dirname(os.path.abspath(__file__)).replace('/python','')
-        self.dataDir  = self.projectDir+'/data/'
-        self.jsonData = self.dataDir+'data.json'       # json data file
-        self.jsonMig  = self.dataDir+'migrations.json' # json migration matrix file
-        self.jsonBkg  = self.dataDir+'background.json' # json background file
+        self.jsonData = None # json data file
+        self.jsonMig  = None # json migration matrix file
+        self.jsonBkg  = None # json background file
         self.rndseed  = -1
         self.mcmc     = None # clarify these attributes (better names? required by pymc?)
         self.stats    = None
         self.trace    = None
         self.verbose = False
     #__________________________________________________________
-    def asString(self, value) : return str(value)
-
-    #__________________________________________________________
     def fluctuate(self, data):
         random.seed(self.rndseed)
         return random.poisson(data)
-
     #__________________________________________________________
     def getBackground(self, jsonfname='', variation='Nominal') :
         """Read bkg from json file.
@@ -52,7 +46,6 @@ class pyFBU(object):
         nameBkg1 = 'BG'
         valuesBkg1 = json.load(open(jsonfname))[nameBkg1][variation]
         return { 'background1' : valuesBkg1 }
-
     #__________________________________________________________
     def run(self):
         data = array(json.load(open(self.jsonData)))
@@ -74,19 +67,11 @@ class pyFBU(object):
                     out[r:r+1] = tmp
             return out
 
-        #This is the unfolded distribution
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=nreco)
-
-        # Define the model using the model class
         model = mc.Model([unfolded, unfold, truth])
-
-        # Call MAP before MCMC to find good starting MCMC values
-        map_ = mc.MAP( model )
+        map_ = mc.MAP( model ) # this call determines good initial MCMC values
         map_.fit()
-
-
-        #Define the MCMC model
-        self.mcmc = mc.MCMC( model )
+        self.mcmc = mc.MCMC( model )  # Define the MCMC model (DG?? clarify, it was defined above)
         self.mcmc.use_step_method(mc.AdaptiveMetropolis, truth)
         self.mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = self.mcmc.stats()
