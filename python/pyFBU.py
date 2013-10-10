@@ -3,7 +3,7 @@ import json
 import os
 
 import pymc as mc
-from numpy import array,mean,std, empty, random
+from numpy import array,mean,std, empty, empty_like, random
 
 import matplotlib.pyplot as plt
 from pylab import savefig
@@ -11,9 +11,7 @@ from pymc.Matplot import plot
 
 
 class pyFBU(object):
-    """A class to perform a MCMC sampling for an unfolding model.
-    The model is specified with a template whose numerical values are
-    filled in reading the inputs from json values.
+    """A class to perform a MCMC sampling.
 
     [more detailed description should be added here]
 
@@ -22,7 +20,6 @@ class pyFBU(object):
     """
     #__________________________________________________________
     def __init__(self):
-        self.templateFile  = None  #required
         self.nMCMC = 100000 # N trials        [begin MCMC parameters]
         self.nBurn = 1000   # todo: describe
         self.nThin = 10     # todo: describe
@@ -30,26 +27,15 @@ class pyFBU(object):
         self.upper = 1500   # upper sampling bound
         #                                     [begin numerical parameters]
         self.projectDir = os.path.dirname(os.path.abspath(__file__)).replace('/python','')
-        self.dataDir = self.projectDir+'/data/'
+        self.dataDir  = self.projectDir+'/data/'
         self.jsonData = self.dataDir+'data.json'       # json data file
         self.jsonMig  = self.dataDir+'migrations.json' # json migration matrix file
         self.jsonBkg  = self.dataDir+'background.json' # json background file
-
-        # model name
-        self.modelName     = 'mymodel'
-
-        # random seed
-        self.rndseed = -1
-
-        # verbose
-        self.verbose       = False # Toggle verbose
-
-        # mcmc model and statistics
-        self.mcmc  = None
-        self.stats = None
-        self.trace = None
-        
- 
+        self.rndseed  = -1
+        self.mcmc     = None # clarify these attributes (better names? required by pymc?)
+        self.stats    = None
+        self.trace    = None
+        self.verbose = False
     #__________________________________________________________
     def asString(self, value) : return str(value)
 
@@ -60,54 +46,32 @@ class pyFBU(object):
 
     #__________________________________________________________
     def getBackground(self, jsonfname='', variation='Nominal') :
-        """Read bkg from json file. Note that because we are using this to
-        fill in a template, we are returning a string, and not the actual
-        numerical values.
+        """Read bkg from json file.
         """
+        print "this function will become obsolete; specify bkg values rather than fname"
         nameBkg1 = 'BG'
         valuesBkg1 = json.load(open(jsonfname))[nameBkg1][variation]
         return { 'background1' : valuesBkg1 }
 
     #__________________________________________________________
     def run(self):
- 
-        # Data points of the distribution to unfold
         data = array(json.load(open(self.jsonData)))
-
-        if self.rndseed>=0:
-            data = self.fluctuate(data)
-
-        # Background distribution
-        bkgd = self.getBackground(self.jsonBkg)
-
-        #This is the number of data bins
+        data = self.fluctuate(data) if self.rndseed>=0 else data
+        bkgd = self.getBackground(self.jsonBkg) if self.jsonBkg else None
         nreco = len(data)
-
-        #Migration matrix truth level -> reconstructed level
         migrations = array(json.load(open(self.jsonMig)))
-
-        #define uniformely distributed variable truth, range betweem lower and upper, for nreco variables
-        truth = mc.DiscreteUniform('truth', lower=self.lower, upper=self.upper, doc='truth', size=nreco)
-
-#        import Tikhonov
-#        truth = Tikhonov.Tikhonov_factory(nreco, 6.1e05, 1e-8, self.lower, self.upper)
-
-#        import DiscreteUniform
-#        truth = DiscreteUniform.myDiscreteUniform_factory(4, self.lower, self.upper)
-
-
+        truth = mc.DiscreteUniform('truth',
+                                   lower=self.lower, upper=self.upper,
+                                   doc='truth', size=nreco)
         #This is where the FBU method is actually implemented
-        #__________________________________________________________
         @mc.deterministic(plot=False)
         def unfold(truth=truth):
             out = empty(nreco)
             for r in xrange(nreco):
-                tmp=0.
-                for b in bkgd:
-                    tmp+=bkgd[b][r]
+                tmp = 0.0 + sum([bkgd[b][r] for b in bkgd.keys()]) if bkgd else 0.0
                 for t in xrange(nreco):
                     tmp += truth[t]*migrations[r][t]
-                    out[r:r+1] = tmp 
+                    out[r:r+1] = tmp
             return out
 
         #This is the unfolded distribution
@@ -118,9 +82,9 @@ class pyFBU(object):
 
         # Call MAP before MCMC to find good starting MCMC values
         map_ = mc.MAP( model )
-        map_.fit() 
+        map_.fit()
 
-        
+
         #Define the MCMC model
         self.mcmc = mc.MCMC( model )
         self.mcmc.use_step_method(mc.AdaptiveMetropolis, truth)
@@ -129,4 +93,4 @@ class pyFBU(object):
         self.trace = self.mcmc.trace("truth")[:]
 
         plot(self.mcmc)
-        savefig("Summary_%s.eps"%self.modelName)
+        savefig("pyfbu_summary.eps")
