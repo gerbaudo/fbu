@@ -61,10 +61,9 @@ class pyFBU(object):
         def unfold(truth=truth):
             out = empty(nreco)
             for r in xrange(nreco):
-                tmp = 0.0 + sum([bkgd[b][r] for b in bkgd.keys()]) if bkgd else 0.0
-                for t in xrange(nreco):
-                    tmp += truth[t]*migrations[r][t]
-                    out[r:r+1] = tmp
+                out[r] = (sum(b[r] for b in bkgd.values()) if bkgd else 0.0
+                          +
+                          sum(truth[t]*migrations[r][t] for t in xrange(nreco)))
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=nreco)
