@@ -52,15 +52,8 @@ class pyFBU(object):
         data = array(json.load(open(self.jsonData)))
         data = self.fluctuate(data) if self.rndseed>=0 else data
         bkgd = self.getBackground(self.jsonBkg) if self.jsonBkg else None
-
-        print data
-        print bkgd
-
         nreco = len(data)
         migrations = array(json.load(open(self.jsonMig)))
-
-        print migrations
-
 
         truth = mc.DiscreteUniform('truth',
                                    lower=self.lower, upper=self.upper,
