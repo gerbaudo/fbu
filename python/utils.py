@@ -7,4 +7,4 @@ def array2json(a, outfname) :
 
 def json2array(infname) :
     with open(infname) as inp:
-        return numpy.array(json.load(inp))
+        return np.array(json.load(inp))
