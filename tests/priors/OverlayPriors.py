@@ -10,9 +10,24 @@ sys.path.append(os.getcwd()+'/priors/')
 #__________________________________________________________
 if __name__ == "__main__":
 
+
+
+    import Tikhonov_Random
+    tikhonov = Tikhonov_Random.Tikhonov_factory(1, 6.1e05, 1e-8, 70000, 140000)
+    samples = [tikhonov.random() for i in range(10000)]
+
+    import matplotlib.pyplot as plt
+    plt.figure()
+    bins = np.linspace(65000, 150000, 100)
+    plt.hist(samples, bins, histtype='stepfilled', normed=False, color='b', label='flat')
+    plt.savefig('testoverlay2.eps')
+
+
+
     flatfunc = mc.DiscreteUniform('flatfunc', 70000, 140000,size=4)
     @mc.deterministic(plot=False)
     def flat(flatfunc=flatfunc): return flatfunc
+
     mcmc = mc.MCMC([flatfunc,flat])
     mcmc.sample(10000)
     trace_flat = mcmc.trace("flatfunc")[:]
