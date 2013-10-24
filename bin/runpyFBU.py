@@ -1,13 +1,15 @@
 #!/bin/env python
 
 import os
+import sys
+sys.path.append('fbu')
 from pyFBU import pyFBU
 from optparse import OptionParser
 
 #__________________________________________________________
 if __name__ == "__main__":
-    projectDir = os.path.dirname(os.path.abspath(__file__)).replace('/python','')
-    dataDir = projectDir+'/data/mc11/'
+    projectDir = os.path.dirname(os.path.abspath(__file__)).replace('/bin','/')
+    dataDir = projectDir+'tests/linearity/data/mc11/'
     defaultData = dataDir+'data.json'
     defaultMig  = dataDir+'migrations.json'
     defaultBkg  = dataDir+'background.json'
@@ -31,6 +33,7 @@ if __name__ == "__main__":
     pyfbu.nThin        = 10
     pyfbu.lower        = 70000
     pyfbu.upper        = 140000
+    pyfbu.prior        = 'Tikhonov'
     pyfbu.jsonData     = jsonData
     pyfbu.jsonMig      = jsonMig
     pyfbu.jsonBkg      = jsonBkg
