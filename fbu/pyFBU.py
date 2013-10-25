@@ -25,6 +25,8 @@ class pyFBU(object):
         self.nThin = 10     # todo: describe
         self.lower = 1000   # lower sampling bound
         self.upper = 1500   # upper sampling bound
+        self.prior = 'DiscreteUniform'
+        self.priorParams = {}
         #                                     [begin numerical parameters]
         self.jsonData  = None # json data file
         self.jsonMig   = None # json migration matrix file
@@ -55,9 +57,11 @@ class pyFBU(object):
         nreco = len(data)
         migrations = array(json.load(open(self.jsonMig)))
 
-        truth = mc.DiscreteUniform('truth',
-                                   lower=self.lower, upper=self.upper,
-                                   doc='truth', size=nreco)
+        import priors
+        truth = priors.PriorWrapper(priorname=self.prior,
+                                    low=self.lower,up=self.upper,
+                                    theSize=nreco,
+                                    other_args=self.priorParams)
 
 
         #This is where the FBU method is actually implemented
