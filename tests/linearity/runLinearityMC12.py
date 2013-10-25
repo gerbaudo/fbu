@@ -7,8 +7,7 @@
 ###################
 
 import sys, os
-sys.path.append(os.getcwd()+'/python/')
-sys.path.append(os.getcwd()+'/priors/')
+sys.path.append(os.getcwd()+'/fbu/')
 
 from pyFBU import pyFBU
 import computeAc
@@ -26,7 +25,7 @@ def Integral(array, up, down):
 
 #__________________________________________________________
 if __name__ == "__main__":
-    Dir = '/afs/cern.ch/user/h/helsens/TopWork/Unfolding/fbu/'
+    Dir = 'tests/linearity/'
     pyfbu = pyFBU()
 
     pyfbu.nMCMC    = 100000
