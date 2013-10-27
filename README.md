@@ -1,6 +1,8 @@
 fbu
 ===
 
+[![Build Status](https://travis-ci.org/gerbaudo/fbu.png)](https://travis-ci.org/gerbaudo/fbu)
+
 Fully Bayesian Unfolding
 
 Implementation of the FBU algorithm described in
