@@ -2,15 +2,15 @@ import numpy as np
 import pylab as plab
 import matplotlib.pyplot as plt
 
-def plotarray(todraw, outfilename):
+def plotarray(todraw, outfilename='foo.png'):
     plab.figure()
     plab.hist(todraw, bins=50)
     plab.xlabel('unfold Ac')
     plab.ylabel('number of events')
     plab.title('posterior distribution of unfolded Ac')
-    plab.savefig('%s.eps'%outfilename,dpi=72)
+    plab.savefig('%s.eps'%outfilename)
 
-def plotarraymulti(todraw, outfilename):
+def plotarraymulti(todraw, outfilename='foo.png'):
     plt.figure()
     bins = np.linspace(-0.05, 0.15, 50)
     plt.hist(todraw[0], bins, histtype='stepfilled', normed=False, color='b',
@@ -22,5 +22,4 @@ def plotarraymulti(todraw, outfilename):
     plt.ylabel('number of events')
     plt.title('posterior distribution of unfolded Ac')
     plt.legend()
-    plt.savefig('%s.eps'%outfilename)
-    plt.savefig('%s.png'%outfilename)
+    plt.savefig(outfilename)
