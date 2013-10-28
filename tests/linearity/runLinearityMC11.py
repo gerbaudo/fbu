@@ -10,7 +10,8 @@ from utils import plot
 def count_outside_range(elements, hi, lo): return sum(1 for e in elements if e>hi or e<lo)
 #__________________________________________________________
 if __name__ == "__main__":
-    lin_dir = './tests/linearity/'
+    out_dir = os.path.dirname(os.path.abspath(__file__))+'/'
+    lin_dir = 'tests/linearity/'
     pyfbu = pyFBU()
     pyfbu.nMCMC = 100000
     pyfbu.nBurn = 1000
@@ -21,10 +22,11 @@ if __name__ == "__main__":
     pyfbu.jsonMig = json_dir+'migrations.json'
     pyfbu.jsonBkg = json_dir+'background.json'
 
-    data_fnames = ["dataA%s%s.json"%(ax, pn) for pn in ['pos','neg'] for ax in [2, 4, 6]]
+    labels = ["A%s%s"%(ax, pn) for pn in ['pos','neg'] for ax in [2, 4, 6]]
+    data_fnames = ["data%s.json"%l for l in labels]
     meanAc, stdAc = [], []
     TestPassed = True
-    for data_fname in data_fnames:
+    for label, data_fname in zip(labels, data_fnames):
         pyfbu.jsonData  = json_dir+data_fname
         pyfbu.modelName = data_fname.replace('.json','')
         pyfbu.run()
@@ -32,7 +34,8 @@ if __name__ == "__main__":
         acValues = np.array(computeAc.computeAcList(pyfbu.trace))
         meanAc.append(np.mean(acValues))
         stdAc.append(np.std(acValues))
-        plot.plotarray(acValues,'Ac_posterior_'+data_fname.replace('.json',''))
+        plot_fname = out_dir+'Ac_posterior_'+label+'.png'
+        plot.plotarray(acValues, plot_fname)
         mean, sigma = np.mean(acValues), np.std(acValues)
         num_outsiders = count_outside_range(acValues, mean+3.*sigma, mean-3.*sigma)
         ratio = float(num_outsiders)/float(len(pyfbu.trace))
@@ -41,9 +44,6 @@ if __name__ == "__main__":
                    +'-->> this is NOT ok, should be < 0.0027 (3sigmas)')
             TestPassed = TestPassed and False
     meanAc, stdAc = np.array(meanAc), np.array(stdAc)
-    testflag = linearity.dolinearityplot(meanAc, stdAc)
-
-    TestPassed = TestPassed and testflag
-
+    TestPassed = TestPassed and linearity.dolinearityplot(meanAc, stdAc, out_dir+'linearity.eps')
     if TestPassed: print 'TEST PASSED'
     else :         print 'TEST FAILED'
