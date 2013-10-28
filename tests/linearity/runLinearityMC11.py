@@ -1,10 +1,4 @@
 #! /bin/env python
-###################
-# davide.gerbaudo@cern.ch clement.helsens@cern.ch, francesco.rubbo@cern.ch
-###################
-# usage:
-# python runLinearityMC11.py
-###################
 
 import sys, os
 import numpy as np
@@ -13,13 +7,7 @@ from fbu.pyFBU import pyFBU
 from tests.linearity import computeAc, linearity
 from utils import plot
 
-def Integral(array, up, down):
-    nb=0
-    print 'up=%f   down=%f'%(up,down)
-    for i in array:
-        if i>up or i<down:nb+=1
-    return nb
-
+def count_outside_range(elements, hi, lo): return sum(1 for e in elements if e>hi or e<lo)
 #__________________________________________________________
 if __name__ == "__main__":
     lin_dir = './tests/linearity/'
@@ -46,13 +34,12 @@ if __name__ == "__main__":
         stdAc.append(np.std(acValues))
         plot.plotarray(acValues,'Ac_posterior_'+data_fname.replace('.json',''))
         mean, sigma = np.mean(acValues), np.std(acValues)
-        integral = Integral(acValues, mean+3.*sigma, mean-3.*sigma)
-        ratio = float(integral)/float(len(trace))
+        num_outsiders = count_outside_range(acValues, mean+3.*sigma, mean-3.*sigma)
+        ratio = float(num_outsiders)/float(len(pyfbu.trace))
         if ratio>0.0027:
-            print 'integral  %i     ratio  %f   -->> this is NOT ok, should be < 0.0027 (3sigmas)'%(integral, ratio)
+            print ("outsiders: %i, ratio  %f"%(num_outsiders, ratio)
+                   +'-->> this is NOT ok, should be < 0.0027 (3sigmas)')
             TestPassed = TestPassed and False
-
-
     meanAc, stdAc = np.array(meanAc), np.array(stdAc)
     testflag = linearity.dolinearityplot(meanAc, stdAc)
 
