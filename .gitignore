@@ -35,3 +35,6 @@ nosetests.xml
 
 # emacs backups
 *~
+# output plots from tests
+*.png
+*.eps
