@@ -3,7 +3,7 @@
 # davide.gerbaudo@cern.ch clement.helsens@cern.ch, francesco.rubbo@cern.ch
 ###################
 # usage:
-# python runLinearityMC11.py 
+# python runLinearityMC11.py
 ###################
 
 import sys, os
@@ -22,54 +22,41 @@ def Integral(array, up, down):
 
 #__________________________________________________________
 if __name__ == "__main__":
-    Dir = './tests/linearity/'
+    lin_dir = './tests/linearity/'
     pyfbu = pyFBU()
     pyfbu.nMCMC = 100000
     pyfbu.nBurn = 1000
     pyfbu.nThin = 10
-    
-    pyfbu.lower = 70000
-    pyfbu.upper = 140000
-
-    pyfbu.jsonMig = Dir+'data/mc11/migrations.json'
-    pyfbu.jsonBkg = Dir+'data/mc11/background.json'
-    
-    #pyfbu.rndseed = 0
-    
     pyfbu.verbose = False
-    
-    dataList = ['dataA6neg.json', 'dataA4neg.json', 'dataA2neg.json', 'dataA2pos.json', 'dataA4pos.json', 'dataA6pos.json']
-    meanAc = []
-    stdAc = []
-    
+    json_dir = lin_dir+'data/mc11/'
+    pyfbu.lower, pyfbu.upper = 70000, 140000
+    pyfbu.jsonMig = json_dir+'migrations.json'
+    pyfbu.jsonBkg = json_dir+'background.json'
+
+    data_fnames = ["dataA%s%s.json"%(ax, pn) for pn in ['pos','neg'] for ax in [2, 4, 6]]
+    meanAc, stdAc = [], []
     TestPassed = True
-
-    for data in dataList:
-        pyfbu.jsonData  = Dir+'data/mc11/'+data
-        pyfbu.modelName = data.replace('.json','')
+    for data_fname in data_fnames:
+        pyfbu.jsonData  = json_dir+data_fname
+        pyfbu.modelName = data_fname.replace('.json','')
         pyfbu.run()
-        trace = pyfbu.trace
-
-        np.save('outputFile'+data.replace('.json',''),trace)
-
-        AcList  = computeAc.computeAcList(trace)
-        AcArray = np.array(AcList)
-        meanAc.append(np.mean(AcArray))
-        stdAc.append(np.std(AcArray))
-        plot.plotarray(AcArray,'Ac_posterior_'+data.replace('.json',''))
-        integral = Integral(AcArray,np.mean(AcArray)+3.*np.std(AcArray),np.mean(AcArray)-3.*np.std(AcArray))
+        # np.save('outputFile'+data_fname.replace('.json',''),trace) # un-needed? DG 2013-10-27
+        acValues = np.array(computeAc.computeAcList(pyfbu.trace))
+        meanAc.append(np.mean(acValues))
+        stdAc.append(np.std(acValues))
+        plot.plotarray(acValues,'Ac_posterior_'+data_fname.replace('.json',''))
+        mean, sigma = np.mean(acValues), np.std(acValues)
+        integral = Integral(acValues, mean+3.*sigma, mean-3.*sigma)
         ratio = float(integral)/float(len(trace))
         if ratio>0.0027:
             print 'integral  %i     ratio  %f   -->> this is NOT ok, should be < 0.0027 (3sigmas)'%(integral, ratio)
-            TestPassed = TestPassed*False
+            TestPassed = TestPassed and False
 
 
-    meanAcArray = np.array(meanAc)
-    stdAcArray  = np.array(stdAc)
+    meanAc, stdAc = np.array(meanAc), np.array(stdAc)
+    testflag = linearity.dolinearityplot(meanAc, stdAc)
 
-    testflag = linearity.dolinearityplot(meanAcArray,stdAcArray)
-
-    TestPassed = TestPassed*testflag
+    TestPassed = TestPassed and testflag
 
     if TestPassed: print 'TEST PASSED'
     else :         print 'TEST FAILED'
