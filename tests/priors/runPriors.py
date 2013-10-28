@@ -7,14 +7,10 @@
 ###################
 
 import sys, os
-sys.path.append(os.getcwd()+'/fbu/')
-sys.path.append(os.getcwd()+'/tests/linearity/')
-
-from pyFBU import pyFBU
-
-import computeAc
-import plot
 import numpy as np
+from fbu.pyFBU import pyFBU
+from tests.linearity import computeAc
+from utils import plot
 
 def Integral(array, up, down):
     nb=0
