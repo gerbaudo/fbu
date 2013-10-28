@@ -12,13 +12,6 @@ from fbu.pyFBU import pyFBU
 from tests.linearity import computeAc
 from utils import plot
 
-def Integral(array, up, down):
-    nb=0
-    print 'up=%f   down=%f'%(up,down)
-    for i in array:
-        if i>up or i<down:nb+=1
-    return nb
-
 #__________________________________________________________
 if __name__ == "__main__":
     Dir = 'tests/linearity/'
