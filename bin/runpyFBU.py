@@ -28,17 +28,18 @@ if __name__ == "__main__":
     verbose = opts.verbose
 
     pyfbu = pyFBU()
-    pyfbu.nMCMC        = 100000
-    pyfbu.nBurn        = 1000
-    pyfbu.nThin        = 10
-    pyfbu.lower        = 70000
-    pyfbu.upper        = 140000
-    pyfbu.prior        = 'Tikhonov'
-    pyfbu.jsonData     = jsonData
-    pyfbu.jsonMig      = jsonMig
-    pyfbu.jsonBkg      = jsonBkg
-    pyfbu.rndseed      = int(rndseed)
-    pyfbu.verbose      = verbose
+    pyfbu.nMCMC            = 100000
+    pyfbu.nBurn            = 1000
+    pyfbu.nThin            = 10
+    pyfbu.lower            = 70000
+    pyfbu.upper            = 140000
+    pyfbu.prior            = 'Tikhonov'
+    import json
+    pyfbu.Data             = json.load(open(jsonData))
+    pyfbu.ResponseMatrix   = json.load(open(jsonMig))
+    pyfbu.Background       = json.load(open(jsonBkg))
+    pyfbu.rndseed          = int(rndseed)
+    pyfbu.verbose          = verbose
     
     pyfbu.run()
 

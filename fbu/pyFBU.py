@@ -1,5 +1,4 @@
 import commands
-import json
 import os
 
 import pymc as mc
@@ -28,9 +27,9 @@ class pyFBU(object):
         self.prior = 'DiscreteUniform'
         self.priorParams = {}
         #                                     [begin numerical parameters]
-        self.jsonData  = None # json data file
-        self.jsonMig   = None # json migration matrix file
-        self.jsonBkg   = None # json background file
+        self.Data           = None # data list
+        self.ResponseMatrix = None # response matrix
+        self.Background     = None # background dict
         self.rndseed   = -1
         self.mcmc      = None # clarify these attributes (better names? required by pymc?)
         self.stats     = None
@@ -42,20 +41,12 @@ class pyFBU(object):
         random.seed(self.rndseed)
         return random.poisson(data)
     #__________________________________________________________
-    def getBackground(self, jsonfname='', variation='Nominal') :
-        """Read bkg from json file.
-        """
-        print "this function will become obsolete; specify bkg values rather than fname"
-        nameBkg1 = 'BG'
-        valuesBkg1 = json.load(open(jsonfname))[nameBkg1][variation]
-        return { 'background1' : valuesBkg1 }
-    #__________________________________________________________
     def run(self):
-        data = array(json.load(open(self.jsonData)))
+        data = array(self.Data)
         data = self.fluctuate(data) if self.rndseed>=0 else data
-        bkgd = self.getBackground(self.jsonBkg) if self.jsonBkg else None
+        bkgd = self.Background['bckg'] 
         nreco = len(data)
-        migrations = array(json.load(open(self.jsonMig)))
+        resmat = array(self.ResponseMatrix)
 
         import priors
         truth = priors.PriorWrapper(priorname=self.prior,
@@ -69,8 +60,9 @@ class pyFBU(object):
         def unfold(truth=truth):
             out = empty(nreco)
             for r in xrange(nreco):
-                out[r] =  sum(b[r] for b in bkgd.values()) if bkgd else 0.0
-                out[r] += sum(truth[t]*migrations[r][t] for t in xrange(nreco))
+                # out[r] =  sum(b[r] for b in bkgd.values()) if bkgd else 0.0
+                out[r] =  bkgd[r]
+                out[r] += sum(truth[t]*resmat[r][t] for t in xrange(nreco))
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=nreco)
