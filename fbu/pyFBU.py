@@ -1,5 +1,5 @@
 import pymc as mc
-from numpy import array, empty, random
+from numpy import empty, random
 
 from pylab import savefig
 from pymc.Matplot import plot
@@ -37,11 +37,11 @@ class pyFBU(object):
         return random.poisson(data)
     #__________________________________________________________
     def run(self):
-        data = array(self.Data)
+        data = self.Data
         data = self.fluctuate(data) if self.rndseed>=0 else data
         bkgd = self.Background['bckg'] 
         nreco = len(data)
-        resmat = array(self.ResponseMatrix)
+        resmat = self.ResponseMatrix
 
         import priors
         truth = priors.PriorWrapper(priorname=self.prior,
