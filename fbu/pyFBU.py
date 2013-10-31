@@ -1,10 +1,6 @@
-import commands
-import os
-
 import pymc as mc
-from numpy import array,mean,std, empty, empty_like, random
+from numpy import array, empty, random
 
-import matplotlib.pyplot as plt
 from pylab import savefig
 from pymc.Matplot import plot
 
@@ -31,7 +27,6 @@ class pyFBU(object):
         self.ResponseMatrix = None # response matrix
         self.Background     = None # background dict
         self.rndseed   = -1
-        self.mcmc      = None # clarify these attributes (better names? required by pymc?)
         self.stats     = None
         self.trace     = None
         self.modelName = 'mymodel' #model name, will be used to save plots with a given name 
@@ -69,11 +64,11 @@ class pyFBU(object):
         model = mc.Model([unfolded, unfold, truth])
         map_ = mc.MAP( model ) # this call determines good initial MCMC values
         map_.fit()
-        self.mcmc = mc.MCMC( model )  # Define the MCMC model (DG?? clarify, it was defined above)
-        self.mcmc.use_step_method(mc.AdaptiveMetropolis, truth)
-        self.mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
-        self.stats = self.mcmc.stats()
-        self.trace = self.mcmc.trace("truth")[:]
+        mcmc = mc.MCMC( model )  # MCMC instance for model
+        mcmc.use_step_method(mc.AdaptiveMetropolis, truth)
+        mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
+        self.stats = mcmc.stats()
+        self.trace = mcmc.trace("truth")[:]
 
-        plot(self.mcmc)
+        plot(mcmc)
         savefig("Summary_%s.eps"%self.modelName)
