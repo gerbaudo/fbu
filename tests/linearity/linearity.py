@@ -10,7 +10,7 @@ font = {'family' : 'serif',
 truth  = np.array([-0.029900, -0.017989, -0.006048,  0.024874, 0.044358, 0.064208])
 
 
-def dolinearityplot(unfold, error):
+def dolinearityplot(unfold, error, outfilename='foo.eps'):
     plab.figure()
     plab.errorbar(truth, unfold, yerr=error,  fmt='o')
 
@@ -23,7 +23,7 @@ def dolinearityplot(unfold, error):
     plab.ylabel('Unfolded Ac')
     plab.title('linearity 4DY bins')
     plab.text(0.02, -0.04, r'y = %f*x + %f'%(m,b))
-    plab.savefig("linearity.eps",dpi=72)
+    plab.savefig(outfilename,dpi=72)
 
     flag = True
     

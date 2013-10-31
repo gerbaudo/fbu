@@ -1,78 +1,49 @@
 #! /bin/env python
-###################
-# davide.gerbaudo@cern.ch clement.helsens@cern.ch, francesco.rubbo@cern.ch
-###################
-# usage:
-# python runLinearityMC11.py 
-###################
 
 import sys, os
-sys.path.append(os.getcwd()+'/fbu/')
-
-from pyFBU import pyFBU
-import computeAc
-import linearity
-import plot
-
 import numpy as np
 
-def Integral(array, up, down):
-    nb=0
-    print 'up=%f   down=%f'%(up,down)
-    for i in array:
-        if i>up or i<down:nb+=1
-    return nb
+from fbu.pyFBU import pyFBU
+from tests.linearity import computeAc, linearity
+from utils import plot
 
+def count_outside_range(elements, hi, lo): return sum(1 for e in elements if e>hi or e<lo)
 #__________________________________________________________
 if __name__ == "__main__":
-    Dir = './tests/linearity/'
+    out_dir = os.path.dirname(os.path.abspath(__file__))+'/'
+    lin_dir = 'tests/linearity/'
     pyfbu = pyFBU()
     pyfbu.nMCMC = 100000
     pyfbu.nBurn = 1000
     pyfbu.nThin = 10
-    
-    pyfbu.lower = 70000
-    pyfbu.upper = 140000
-
-    pyfbu.jsonMig = Dir+'data/mc11/migrations.json'
-    pyfbu.jsonBkg = Dir+'data/mc11/background.json'
-    
-    #pyfbu.rndseed = 0
-    
     pyfbu.verbose = False
-    
-    dataList = ['dataA6neg.json', 'dataA4neg.json', 'dataA2neg.json', 'dataA2pos.json', 'dataA4pos.json', 'dataA6pos.json']
-    meanAc = []
-    stdAc = []
-    
+    json_dir = lin_dir+'data/mc11/'
+    pyfbu.lower, pyfbu.upper = 70000, 140000
+    pyfbu.jsonMig = json_dir+'migrations.json'
+    pyfbu.jsonBkg = json_dir+'background.json'
+
+    labels = ["A%s%s"%(ax, pn) for pn in ['pos','neg'] for ax in [2, 4, 6]]
+    data_fnames = ["data%s.json"%l for l in labels]
+    meanAc, stdAc = [], []
     TestPassed = True
-
-    for data in dataList:
-        pyfbu.jsonData  = Dir+'data/mc11/'+data
-        pyfbu.modelName = data.replace('.json','')
+    for label, data_fname in zip(labels, data_fnames):
+        pyfbu.jsonData  = json_dir+data_fname
+        pyfbu.modelName = data_fname.replace('.json','')
         pyfbu.run()
-        trace = pyfbu.trace
-
-        np.save('outputFile'+data.replace('.json',''),trace)
-
-        AcList  = computeAc.computeAcList(trace)
-        AcArray = np.array(AcList)
-        meanAc.append(np.mean(AcArray))
-        stdAc.append(np.std(AcArray))
-        plot.plotarray(AcArray,'Ac_posterior_'+data.replace('.json',''))
-        integral = Integral(AcArray,np.mean(AcArray)+3.*np.std(AcArray),np.mean(AcArray)-3.*np.std(AcArray))
-        ratio = float(integral)/float(len(trace))
+        # np.save('outputFile'+data_fname.replace('.json',''),trace) # un-needed? DG 2013-10-27
+        acValues = np.array(computeAc.computeAcList(pyfbu.trace))
+        meanAc.append(np.mean(acValues))
+        stdAc.append(np.std(acValues))
+        plot_fname = out_dir+'Ac_posterior_'+label+'.png'
+        plot.plotarray(acValues, plot_fname)
+        mean, sigma = np.mean(acValues), np.std(acValues)
+        num_outsiders = count_outside_range(acValues, mean+3.*sigma, mean-3.*sigma)
+        ratio = float(num_outsiders)/float(len(pyfbu.trace))
         if ratio>0.0027:
-            print 'integral  %i     ratio  %f   -->> this is NOT ok, should be < 0.0027 (3sigmas)'%(integral, ratio)
-            TestPassed = TestPassed*False
-
-
-    meanAcArray = np.array(meanAc)
-    stdAcArray  = np.array(stdAc)
-
-    testflag = linearity.dolinearityplot(meanAcArray,stdAcArray)
-
-    TestPassed = TestPassed*testflag
-
+            print ("outsiders: %i, ratio  %f"%(num_outsiders, ratio)
+                   +'-->> this is NOT ok, should be < 0.0027 (3sigmas)')
+            TestPassed = TestPassed and False
+    meanAc, stdAc = np.array(meanAc), np.array(stdAc)
+    TestPassed = TestPassed and linearity.dolinearityplot(meanAc, stdAc, out_dir+'linearity.eps')
     if TestPassed: print 'TEST PASSED'
     else :         print 'TEST FAILED'
