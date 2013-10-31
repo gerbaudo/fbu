@@ -22,19 +22,20 @@ if __name__ == "__main__":
 
     json_dir = lin_dir+'data/mc12/'
     pyfbu.lower, pyfbu.upper = 400000, 900000
-    pyfbu.jsonMig  = json_dir+migr
-    pyfbu.jsonBkg  = json_dir+back
-    pyfbu.jsonData = json_dir+data
+    import json
+    pyfbu.ResponseMatrix  = json.load(open(json_dir+migr))
+    pyfbu.Background  = json.load(open(json_dir+back))
+    pyfbu.Data = json.load(open(json_dir+data))
     pyfbu.modelName = data.replace('.json','')
     pyfbu.run()
     acListmc12  = computeAc.computeAcList(pyfbu.trace)
     acArraymc12 = np.array(acListmc12)
 
     json_dir = lin_dir+'data/mc11/'
+    pyfbu.ResponseMatrix  = json.load(open(json_dir+migr))
+    pyfbu.Background  = json.load(open(json_dir+back))
+    pyfbu.Data = json.load(open(json_dir+data))
     pyfbu.lower, pyfbu.upper = 70000, 140000
-    pyfbu.jsonMig  = json_dir+migr
-    pyfbu.jsonBkg  = json_dir+back
-    pyfbu.jsonData = json_dir+data
     pyfbu.modelName = data.replace('.json','')
     pyfbu.run()
     acListmc11  = computeAc.computeAcList(pyfbu.trace)
