@@ -1,0 +1,41 @@
+language: python
+
+python:
+  - "2.7"
+
+before_install:
+  - sudo apt-get install liblapack-dev gfortran python-scipy libblas-dev libsuitesparse-dev swig
+  - sudo rmdir /dev/shm
+  - sudo ln -Tsf /{run,dev}/shm
+
+install:
+  # perhaps we could use the system libraries?
+  # sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
+
+  # do we really need to specify the versions? they don't do it at github.com/pymc-devs/pymc
+  - pip install numpy
+  - pip install matplotlib==1.3.0
+  - pip install nose==1.3.0
+  - pip install pymc==2.2
+  - pip install pyparsing==2.0.1
+  - pip install python-dateutil==2.1
+#  - pip install scipy==0.12.0
+  - pip install six==1.3.0
+  - pip install tornado==3.1
+  - pip install wsgiref==0.1.2
+  - pip install flake8
+
+script:
+
+  # Check if numpy and pymc are ok
+  - time python -c 'import numpy as np; print np.array([1,2,3]).shape'
+  - time python -c 'import pymc'
+
+  # Check that the fbu modules can be imported
+  # TBD
+  # validate syntax and check for errors (later on)
+  # - flake8 fbu/ tests/ utils/
+
+  # Now run the tests
+  - python tests/dummy.py
+
