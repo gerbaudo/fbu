@@ -21,7 +21,7 @@ if __name__ == "__main__":
     json_dir = lin_dir+'data/mc11/'
     pyfbu.lower, pyfbu.upper = 70000, 140000
     pyfbu.ResponseMatrix = json.load(open(json_dir+'migrations.json'))
-    pyfbu.Background = json.load(open(json_dir+'background.json'))
+    pyfbu.Background     = json.load(open(json_dir+'background.json'))
 
     labels = ["A%s%s"%(ax, pn) for pn in ['pos','neg'] for ax in [2, 4, 6]]
     data_fnames = ["data%s.json"%l for l in labels]

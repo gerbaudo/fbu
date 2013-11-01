@@ -55,7 +55,6 @@ class pyFBU(object):
         def unfold(truth=truth):
             out = empty(nreco)
             for r in xrange(nreco):
-                # out[r] =  sum(b[r] for b in bkgd.values()) if bkgd else 0.0
                 out[r] =  bkgd[r]
                 out[r] += sum(truth[t]*resmat[r][t] for t in xrange(nreco))
             return out
