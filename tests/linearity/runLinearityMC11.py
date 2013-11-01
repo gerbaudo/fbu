@@ -1,6 +1,7 @@
 #! /bin/env python
 
 import sys, os
+import json
 import numpy as np
 
 from fbu.pyFBU import pyFBU
@@ -19,15 +20,15 @@ if __name__ == "__main__":
     pyfbu.verbose = False
     json_dir = lin_dir+'data/mc11/'
     pyfbu.lower, pyfbu.upper = 70000, 140000
-    pyfbu.jsonMig = json_dir+'migrations.json'
-    pyfbu.jsonBkg = json_dir+'background.json'
+    pyfbu.ResponseMatrix = json.load(open(json_dir+'migrations.json'))
+    pyfbu.Background     = json.load(open(json_dir+'background.json'))
 
     labels = ["A%s%s"%(ax, pn) for pn in ['pos','neg'] for ax in [2, 4, 6]]
     data_fnames = ["data%s.json"%l for l in labels]
     meanAc, stdAc = [], []
     TestPassed = True
     for label, data_fname in zip(labels, data_fnames):
-        pyfbu.jsonData  = json_dir+data_fname
+        pyfbu.Data  = json.load(open(json_dir+data_fname))
         pyfbu.modelName = data_fname.replace('.json','')
         pyfbu.run()
         # np.save('outputFile'+data_fname.replace('.json',''),trace) # un-needed? DG 2013-10-27
