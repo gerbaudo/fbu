@@ -27,7 +27,7 @@ class pyFBU(object):
         self.trace     = None
         self.verbose   = False
         self.name      = '' 
-        self.ValidationPlots = True
+        self.Monitoring = False
     #__________________________________________________________
     def fluctuate(self, data):
         random.seed(self.rndseed)
@@ -66,7 +66,7 @@ class pyFBU(object):
         self.stats = mcmc.stats()
         self.trace = mcmc.trace("truth")[:]
 
-        if self.ValidationPlots:
+        if self.Monitoring:
             import ValidationPlots
             ValidationPlots.plot(self.name,data,bkgd,resmat,self.trace,
                                  self.lower,self.upper)
