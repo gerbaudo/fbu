@@ -1,10 +1,6 @@
 import pymc as mc
 from numpy import empty, random
 
-from pylab import savefig
-from pymc.Matplot import plot
-
-
 class pyFBU(object):
     """A class to perform a MCMC sampling.
 
@@ -29,8 +25,9 @@ class pyFBU(object):
         self.rndseed   = -1
         self.stats     = None
         self.trace     = None
-        self.modelName = 'mymodel' #model name, will be used to save plots with a given name 
         self.verbose   = False
+        self.name      = '' 
+        self.ValidationPlots = True
     #__________________________________________________________
     def fluctuate(self, data):
         random.seed(self.rndseed)
@@ -69,5 +66,8 @@ class pyFBU(object):
         self.stats = mcmc.stats()
         self.trace = mcmc.trace("truth")[:]
 
-        plot(mcmc)
-        savefig("Summary_%s.eps"%self.modelName)
+        if self.ValidationPlots:
+            import ValidationPlots
+            ValidationPlots.plot(self.name,data,bkgd,resmat,self.trace,
+                                 self.lower,self.upper)
+
