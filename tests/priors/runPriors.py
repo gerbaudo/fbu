@@ -2,7 +2,7 @@
 
 import sys, os
 import numpy as np
-from fbu.pyFBU import pyFBU
+from fbu.PyFBU import PyFBU
 from tests.linearity import computeAc
 from utils import plot
 
@@ -10,7 +10,7 @@ from utils import plot
 if __name__ == "__main__":
     out_dir = os.path.dirname(os.path.abspath(__file__))+'/'
     lin_dir = 'tests/linearity/'
-    pyfbu = pyFBU()
+    pyfbu = PyFBU()
 
     pyfbu.nMCMC    = 100000
     pyfbu.setnBurn = 1000
@@ -23,20 +23,18 @@ if __name__ == "__main__":
     json_dir = lin_dir+'data/mc12/'
     pyfbu.lower, pyfbu.upper = 400000, 900000
     import json
-    pyfbu.ResponseMatrix  = json.load(open(json_dir+migr))
-    pyfbu.Background  = json.load(open(json_dir+back))
-    pyfbu.Data = json.load(open(json_dir+data))
-    pyfbu.modelName = data.replace('.json','')
+    pyfbu.response  = json.load(open(json_dir+migr))
+    pyfbu.background  = json.load(open(json_dir+back))
+    pyfbu.data = json.load(open(json_dir+data))
     pyfbu.run()
     acListmc12  = computeAc.computeAcList(pyfbu.trace)
     acArraymc12 = np.array(acListmc12)
 
     json_dir = lin_dir+'data/mc11/'
-    pyfbu.ResponseMatrix  = json.load(open(json_dir+migr))
-    pyfbu.Background  = json.load(open(json_dir+back))
-    pyfbu.Data = json.load(open(json_dir+data))
+    pyfbu.response  = json.load(open(json_dir+migr))
+    pyfbu.background  = json.load(open(json_dir+back))
+    pyfbu.data = json.load(open(json_dir+data))
     pyfbu.lower, pyfbu.upper = 70000, 140000
-    pyfbu.modelName = data.replace('.json','')
     pyfbu.run()
     acListmc11  = computeAc.computeAcList(pyfbu.trace)
     acArraymc11 = np.array(acListmc11)

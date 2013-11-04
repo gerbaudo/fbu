@@ -4,7 +4,7 @@ import sys, os
 import json
 import numpy as np
 
-from fbu.pyFBU import pyFBU
+from fbu.PyFBU import PyFBU
 from tests.linearity import computeAc, linearity
 from utils import plot
 
@@ -13,22 +13,22 @@ def count_outside_range(elements, hi, lo): return sum(1 for e in elements if e>h
 if __name__ == "__main__":
     out_dir = os.path.dirname(os.path.abspath(__file__))+'/'
     lin_dir = 'tests/linearity/'
-    pyfbu = pyFBU()
+    pyfbu = PyFBU()
     pyfbu.nMCMC = 100000
     pyfbu.nBurn = 1000
     pyfbu.nThin = 10
     pyfbu.verbose = False
     json_dir = lin_dir+'data/mc11/'
     pyfbu.lower, pyfbu.upper = 70000, 140000
-    pyfbu.ResponseMatrix = json.load(open(json_dir+'migrations.json'))
-    pyfbu.Background     = json.load(open(json_dir+'background.json'))
+    pyfbu.response       = json.load(open(json_dir+'migrations.json'))
+    pyfbu.background     = json.load(open(json_dir+'background.json'))
 
     labels = ["A%s%s"%(ax, pn) for pn in ['pos','neg'] for ax in [2, 4, 6]]
     data_fnames = ["data%s.json"%l for l in labels]
     meanAc, stdAc = [], []
     TestPassed = True
     for label, data_fname in zip(labels, data_fnames):
-        pyfbu.Data  = json.load(open(json_dir+data_fname))
+        pyfbu.data  = json.load(open(json_dir+data_fname))
         pyfbu.modelName = data_fname.replace('.json','')
         pyfbu.run()
         # np.save('outputFile'+data_fname.replace('.json',''),trace) # un-needed? DG 2013-10-27
