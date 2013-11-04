@@ -1,5 +1,5 @@
 import pymc as mc
-from numpy import empty, random
+from numpy import empty, random, dot
 
 class PyFBU(object):
     """A class to perform a MCMC sampling.
@@ -22,6 +22,7 @@ class PyFBU(object):
         self.data        = None # data list
         self.response    = None # response matrix
         self.background  = None # background dict
+        self.backgroundsyst = None
         self.rndseed   = -1
         self.stats     = None
         self.trace     = None
@@ -36,7 +37,9 @@ class PyFBU(object):
     def run(self):
         data = self.data
         data = self.fluctuate(data) if self.rndseed>=0 else data
-        bkgd = self.background['bckg'] 
+        bkgd = [self.background[syst] for syst in self.backgroundsyst] 
+
+        print bkgd
         ndim = len(data)
         resmat = self.response
 
@@ -46,14 +49,16 @@ class PyFBU(object):
                                     size=ndim,
                                     other_args=self.priorparams)
 
+        def smear(bckg):
+            return bckg[0]
+
 
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
         def unfold(truth=truth):
             out = empty(ndim)
-            for r in xrange(ndim):
-                out[r] =  bkgd[r]
-                out[r] += sum(truth[t]*resmat[r][t] for t in xrange(ndim))
+            bckg = smear(bkgd)
+            out = bckg + dot(truth, resmat)
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=ndim)
@@ -68,6 +73,6 @@ class PyFBU(object):
 
         if self.monitoring:
             import validation
-            validation.plot(self.name,data,bkgd,resmat,self.trace,
+            validation.plot(self.name+'_monitoring',data,bkgd,resmat,self.trace,
                                  self.lower,self.upper)
 

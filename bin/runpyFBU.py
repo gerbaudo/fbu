@@ -31,13 +31,15 @@ if __name__ == "__main__":
     pyfbu.nMCMC            = 100000
     pyfbu.nBurn            = 1000
     pyfbu.nThin            = 10
-    pyfbu.lower            = 70000
-    pyfbu.upper            = 140000
-    pyfbu.prior            = 'Tikhonov'
+    pyfbu.lower            = 40000
+    pyfbu.upper            = 120000
+#    pyfbu.prior            = 'Tikhonov'
     import json
     pyfbu.data             = json.load(open(jsondata))
     pyfbu.response         = json.load(open(jsonmig))
     pyfbu.background       = json.load(open(jsonbkg))
+    pyfbu.backgroundsyst = ['bckg']
+    pyfbu.monitoring = True
     pyfbu.rndseed          = int(rndseed)
     pyfbu.verbose          = verbose
     

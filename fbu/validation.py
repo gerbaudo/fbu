@@ -23,4 +23,4 @@ def plot(dirname,data,bkgd,resmat,trace,lower=0,upper=0):
         plt.hlines(ymean,lower,upper,linestyles='dashed',colors='m',label='hyperbox')
         plt.vlines(data[bin],0.,ymean,linestyles='solid',colors='c',label='data')
         plt.xlim(xmin=0)
-        plt.savefig(dirname+'_monitoring/bin%s.eps'%bin)
+        plt.savefig(dirname+'/bin%s.eps'%bin)
