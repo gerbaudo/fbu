@@ -4,8 +4,8 @@ from numpy import mean,std,arange
 
 def plot(dirname,data,bkgd,resmat,trace,lower=0,upper=0):
     import os
-    if not os.path.exists(dirname+'_monitoring'):
-        os.makedirs(dirname+'_monitoring')
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
     nbins = len(data)
     bintrace = zip(*trace)
     for bin in xrange(nbins): 
@@ -25,5 +25,5 @@ def plot(dirname,data,bkgd,resmat,trace,lower=0,upper=0):
         plt.subplot(212)
         x = arange(len(trace))
         plt.plot(x,trace[:,bin],label='trace of bin %d'%bin)
-        plt.savefig(dirname+'_monitoring/bin%s.eps'%bin)
+        plt.savefig(dirname+'/bin%s.eps'%bin)
         plt.close()
