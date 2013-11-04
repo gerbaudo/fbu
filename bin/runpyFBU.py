@@ -3,31 +3,31 @@
 import os
 import sys
 sys.path.append('fbu')
-from pyFBU import pyFBU
+from PyFBU import PyFBU
 from optparse import OptionParser
 
 #__________________________________________________________
 if __name__ == "__main__":
-    projectDir = os.path.dirname(os.path.abspath(__file__)).replace('/bin','/')
-    dataDir = projectDir+'tests/linearity/data/mc11/'
-    defaultData = dataDir+'data.json'
-    defaultMig  = dataDir+'migrations.json'
-    defaultBkg  = dataDir+'background.json'
+    projectdir = os.path.dirname(os.path.abspath(__file__)).replace('/bin','/')
+    datadir = projectdir+'tests/linearity/data/mc11/'
+    defaultdata = datadir+'data.json'
+    defaultmig  = datadir+'migrations.json'
+    defaultbkg  = datadir+'background.json'
     usage = "usage: %prog -t python/unfold_template.py [options]"
     parser = OptionParser(usage=usage)
-    parser.add_option ('-D', '--data', default=defaultData, help="json data file")
-    parser.add_option ('-M', '--matrix', default=defaultMig, help="json migration matrix file")
-    parser.add_option ('-B', '--background', default=defaultBkg, help="json background file")
+    parser.add_option ('-D', '--data', default=defaultdata, help="json data file")
+    parser.add_option ('-M', '--matrix', default=defaultmig, help="json migration matrix file")
+    parser.add_option ('-B', '--background', default=defaultbkg, help="json background file")
     parser.add_option ('-s', '--seed', default=-1, help='random seed value. should be greater than -1 to ues a different random seed. Default is -1, so same random seed')
     parser.add_option ('-v', '--verbose', help='Toggle verbose', action='store_true', default=False)
     (opts, args) = parser.parse_args()
-    jsonData = opts.data
-    jsonMig = opts.matrix
-    jsonBkg = opts.background
+    jsondata = opts.data
+    jsonmig = opts.matrix
+    jsonbkg = opts.background
     rndseed = opts.seed
     verbose = opts.verbose
 
-    pyfbu = pyFBU()
+    pyfbu = PyFBU()
     pyfbu.nMCMC            = 100000
     pyfbu.nBurn            = 1000
     pyfbu.nThin            = 10
@@ -35,9 +35,9 @@ if __name__ == "__main__":
     pyfbu.upper            = 140000
     pyfbu.prior            = 'Tikhonov'
     import json
-    pyfbu.Data             = json.load(open(jsonData))
-    pyfbu.ResponseMatrix   = json.load(open(jsonMig))
-    pyfbu.Background       = json.load(open(jsonBkg))
+    pyfbu.data             = json.load(open(jsondata))
+    pyfbu.response         = json.load(open(jsonmig))
+    pyfbu.background       = json.load(open(jsonbkg))
     pyfbu.rndseed          = int(rndseed)
     pyfbu.verbose          = verbose
     

@@ -17,11 +17,11 @@ class PyFBU(object):
         self.lower = 1000   # lower sampling bound
         self.upper = 1500   # upper sampling bound
         self.prior = 'DiscreteUniform'
-        self.priorParams = {}
+        self.priorparams = {}
         #                                     [begin numerical parameters]
-        self.data           = None # data list
-        self.responseMatrix = None # response matrix
-        self.background     = None # background dict
+        self.data        = None # data list
+        self.response    = None # response matrix
+        self.background  = None # background dict
         self.rndseed   = -1
         self.stats     = None
         self.trace     = None
@@ -37,26 +37,26 @@ class PyFBU(object):
         data = self.data
         data = self.fluctuate(data) if self.rndseed>=0 else data
         bkgd = self.background['bckg'] 
-        nreco = len(data)
-        resmat = self.responseMatrix
+        ndim = len(data)
+        resmat = self.response
 
         import priors
         truth = priors.wrapper(priorname=self.prior,
                                     low=self.lower,up=self.upper,
-                                    theSize=nreco,
-                                    other_args=self.priorParams)
+                                    size=ndim,
+                                    other_args=self.priorparams)
 
 
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
         def unfold(truth=truth):
-            out = empty(nreco)
-            for r in xrange(nreco):
+            out = empty(ndim)
+            for r in xrange(ndim):
                 out[r] =  bkgd[r]
-                out[r] += sum(truth[t]*resmat[r][t] for t in xrange(nreco))
+                out[r] += sum(truth[t]*resmat[r][t] for t in xrange(ndim))
             return out
 
-        unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=nreco)
+        unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=ndim)
         model = mc.Model([unfolded, unfold, truth])
         map_ = mc.MAP( model ) # this call determines good initial MCMC values
         map_.fit()
