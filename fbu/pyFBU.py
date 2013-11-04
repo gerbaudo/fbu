@@ -19,29 +19,29 @@ class pyFBU(object):
         self.prior = 'DiscreteUniform'
         self.priorParams = {}
         #                                     [begin numerical parameters]
-        self.Data           = None # data list
-        self.ResponseMatrix = None # response matrix
-        self.Background     = None # background dict
+        self.data           = None # data list
+        self.responseMatrix = None # response matrix
+        self.background     = None # background dict
         self.rndseed   = -1
         self.stats     = None
         self.trace     = None
         self.verbose   = False
         self.name      = '' 
-        self.Monitoring = False
+        self.monitoring = False
     #__________________________________________________________
     def fluctuate(self, data):
         random.seed(self.rndseed)
         return random.poisson(data)
     #__________________________________________________________
     def run(self):
-        data = self.Data
+        data = self.data
         data = self.fluctuate(data) if self.rndseed>=0 else data
-        bkgd = self.Background['bckg'] 
+        bkgd = self.background['bckg'] 
         nreco = len(data)
-        resmat = self.ResponseMatrix
+        resmat = self.responseMatrix
 
         import priors
-        truth = priors.PriorWrapper(priorname=self.prior,
+        truth = priors.wrapper(priorname=self.prior,
                                     low=self.lower,up=self.upper,
                                     theSize=nreco,
                                     other_args=self.priorParams)
@@ -66,8 +66,8 @@ class pyFBU(object):
         self.stats = mcmc.stats()
         self.trace = mcmc.trace("truth")[:]
 
-        if self.Monitoring:
-            import ValidationPlots
-            ValidationPlots.plot(self.name,data,bkgd,resmat,self.trace,
+        if self.monitoring:
+            import validation
+            validation.plot(self.name,data,bkgd,resmat,self.trace,
                                  self.lower,self.upper)
 
