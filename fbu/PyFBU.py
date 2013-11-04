@@ -1,7 +1,7 @@
 import pymc as mc
 from numpy import empty, random
 
-class pyFBU(object):
+class PyFBU(object):
     """A class to perform a MCMC sampling.
 
     [more detailed description should be added here]
