@@ -1,5 +1,5 @@
 import pymc as mc
-from numpy import empty, random, dot
+from numpy import random, dot, array, empty
 
 class PyFBU(object):
     """A class to perform a MCMC sampling.
@@ -37,9 +37,7 @@ class PyFBU(object):
     def run(self):
         data = self.data
         data = self.fluctuate(data) if self.rndseed>=0 else data
-        bkgd = [self.background[syst] for syst in self.backgroundsyst] 
-
-        print bkgd
+        backgrounds = [self.background[syst] for syst in self.backgroundsyst] 
         ndim = len(data)
         resmat = self.response
 
@@ -49,30 +47,41 @@ class PyFBU(object):
                                     size=ndim,
                                     other_args=self.priorparams)
 
-        def smear(bckg):
-            return bckg[0]
+        gausparams = mc.Normal('gaus_'+syst,mu=0,tau=1.0,size=len(backgrounds)) 
 
+        #NEEDS TO BE REWRITTEN WITH VECTORIZATION!!!!!
+        def smear(backgrounds,params):
+            totbckg = [0]*ndim
+            for syst,par,bckg in zip(self.backgroundsyst.values(),params,backgrounds):
+                for ii in xrange(ndim):
+                    totbckg[ii] += (1.+par*syst)*bckg[ii]
+            return totbckg
 
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
-        def unfold(truth=truth):
-            out = empty(ndim)
-            bckg = smear(bkgd)
+        def unfold(truth=truth,gausparams=gausparams):
+            bckg = smear(backgrounds,gausparams)
             out = bckg + dot(truth, resmat)
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=ndim)
         model = mc.Model([unfolded, unfold, truth])
+
         map_ = mc.MAP( model ) # this call determines good initial MCMC values
         map_.fit()
+
         mcmc = mc.MCMC( model )  # MCMC instance for model
-        mcmc.use_step_method(mc.AdaptiveMetropolis, truth)
+
+        #we don't have any control on this feature...
+        #we cannot use them until we don't understand how to validate
+        # mcmc.use_step_method(mc.AdaptiveMetropolis, truth)
+
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
         self.trace = mcmc.trace("truth")[:]
 
         if self.monitoring:
             import validation
-            validation.plot(self.name+'_monitoring',data,bkgd,resmat,self.trace,
+            validation.plot(self.name+'_monitoring',data,backgrounds,resmat,self.trace,
                                  self.lower,self.upper)
 
