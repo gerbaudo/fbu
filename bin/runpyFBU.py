@@ -38,7 +38,7 @@ if __name__ == "__main__":
     pyfbu.data             = json.load(open(jsondata))
     pyfbu.response         = json.load(open(jsonmig))
     pyfbu.background       = json.load(open(jsonbkg))
-    pyfbu.backgroundsyst = ['bckg']
+    pyfbu.backgroundsyst = {'bckg':0.20}
     pyfbu.monitoring = True
     pyfbu.rndseed          = int(rndseed)
     pyfbu.verbose          = verbose
