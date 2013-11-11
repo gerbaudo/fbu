@@ -47,7 +47,7 @@ class PyFBU(object):
                                     size=ndim,
                                     other_args=self.priorparams)
 
-        gausparams = mc.Normal('gaus_'+syst,mu=0,tau=1.0,size=len(backgrounds)) 
+        gausparams = mc.Normal('gaus_bckg',value=[0. for xx in backgrounds],mu=0,tau=1.0,size=len(backgrounds)) 
 
         #NEEDS TO BE REWRITTEN WITH VECTORIZATION!!!!!
         def smear(backgrounds,params):
@@ -65,7 +65,7 @@ class PyFBU(object):
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=ndim)
-        model = mc.Model([unfolded, unfold, truth])
+        model = mc.Model([unfolded, unfold, truth,gausparams])
 
         map_ = mc.MAP( model ) # this call determines good initial MCMC values
         map_.fit()
@@ -78,10 +78,11 @@ class PyFBU(object):
 
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
-        self.trace = mcmc.trace("truth")[:]
-
+        self.trace = mcmc.trace("truth")
+        self.bckgtrace = mcmc.trace('gaus_bckg')
+        
         if self.monitoring:
             import validation
             validation.plot(self.name+'_monitoring',data,backgrounds,resmat,self.trace,
-                                 self.lower,self.upper)
+                            self.bckgtrace,self.lower,self.upper)
 
