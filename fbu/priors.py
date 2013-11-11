@@ -1,16 +1,16 @@
 import pymc
 
-import Tikhonov
+import tikhonov
 priors = {
-    'Tikhonov':Tikhonov.Tikhonov
+    'Tikhonov':tikhonov.tikhonov
     }
 
-def PriorWrapper(priorname='',low=0,up=100,theSize=1,other_args={}):
+def wrapper(priorname='',low=0,up=100,size=1,other_args={}):
 
     default_args = dict(name='truth',
                         lower=low,
                         upper=up,
-                        size=theSize)
+                        size=size)
     args = dict(default_args.items()+other_args.items())
     
     if priorname in priors: 
