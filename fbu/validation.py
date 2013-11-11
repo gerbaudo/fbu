@@ -22,7 +22,7 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=0,upper=0):
     bintrace = zip(*trace)
 
     for bin in xrange(nbins): 
-        ax = plt.subplot(311)
+        ax = plt.subplot(211)
         xx = bintrace[bin]
         mu = mean(xx)
         sigma = std(xx)
@@ -35,10 +35,8 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=0,upper=0):
         plt.hlines(ymean,lower,upper,linestyles='dashed',colors='m',label='hyperbox')
         plt.vlines(data[bin],0.,ymean,linestyles='solid',colors='c',label='data')
         plt.xlim(xmin=0)
-        plt.subplot(312)
+        plt.subplot(212)
         x = arange(len(trace))
         plt.plot(x,trace[:,bin],label='trace of bin %d'%bin)
-        plt.subplot(313)
-        plt.plot(x,bckgtrace[:,0],label='trace of background')
         plt.savefig(dirname+'/bin%s.eps'%bin)
         plt.close()
