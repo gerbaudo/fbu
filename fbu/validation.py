@@ -1,16 +1,15 @@
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
-from numpy import mean,std
+from numpy import mean,std,arange
 
 def plot(dirname,data,bkgd,resmat,trace,lower=0,upper=0):
     import os
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
+    if not os.path.exists(dirname+'_monitoring'):
+        os.makedirs(dirname+'_monitoring')
     nbins = len(data)
     bintrace = zip(*trace)
     for bin in xrange(nbins): 
-        fig = plt.figure(num=bin)
-        ax = fig.add_subplot(111)
+        ax = plt.subplot(211)
         xx = bintrace[bin]
         mu = mean(xx)
         sigma = std(xx)
@@ -23,4 +22,7 @@ def plot(dirname,data,bkgd,resmat,trace,lower=0,upper=0):
         plt.hlines(ymean,lower,upper,linestyles='dashed',colors='m',label='hyperbox')
         plt.vlines(data[bin],0.,ymean,linestyles='solid',colors='c',label='data')
         plt.xlim(xmin=0)
+        plt.subplot(212)
+        x = arange(len(trace))
+        plt.plot(x,trace[:,bin],label='trace of bin %d'%bin)
         plt.savefig(dirname+'_monitoring/bin%s.eps'%bin)
