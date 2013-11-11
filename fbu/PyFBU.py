@@ -65,6 +65,7 @@ class PyFBU(object):
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=ndim)
+
         model = mc.Model([unfolded, unfold, truth,gausparams])
 
         map_ = mc.MAP( model ) # this call determines good initial MCMC values
