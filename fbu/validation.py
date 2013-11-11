@@ -1,15 +1,28 @@
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 from numpy import mean,std,arange
+import pymc
+from pymc.Matplot import plot as mcplot
 
-def plot(dirname,data,bkgd,resmat,trace,lower=0,upper=0):
+def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=0,upper=0):
     import os
     if not os.path.exists(dirname):
         os.makedirs(dirname)
+
+    mcplot(bckgtrace,common_scale=False)
+    plt.savefig(dirname+'/pymc_summary_bckgs.eps')
+    plt.close()
+    mcplot(trace,common_scale=False)
+    plt.savefig(dirname+'/pymc_summary_bins.eps')
+    plt.close()
+
+    trace = trace[:]
+    bckgtrace = bckgtrace[:]
     nbins = len(data)
     bintrace = zip(*trace)
+
     for bin in xrange(nbins): 
-        ax = plt.subplot(211)
+        ax = plt.subplot(311)
         xx = bintrace[bin]
         mu = mean(xx)
         sigma = std(xx)
@@ -22,8 +35,10 @@ def plot(dirname,data,bkgd,resmat,trace,lower=0,upper=0):
         plt.hlines(ymean,lower,upper,linestyles='dashed',colors='m',label='hyperbox')
         plt.vlines(data[bin],0.,ymean,linestyles='solid',colors='c',label='data')
         plt.xlim(xmin=0)
-        plt.subplot(212)
+        plt.subplot(312)
         x = arange(len(trace))
         plt.plot(x,trace[:,bin],label='trace of bin %d'%bin)
+        plt.subplot(313)
+        plt.plot(x,bckgtrace[:,0],label='trace of background')
         plt.savefig(dirname+'/bin%s.eps'%bin)
         plt.close()
