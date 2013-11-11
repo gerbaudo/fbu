@@ -26,3 +26,4 @@ def plot(dirname,data,bkgd,resmat,trace,lower=0,upper=0):
         x = arange(len(trace))
         plt.plot(x,trace[:,bin],label='trace of bin %d'%bin)
         plt.savefig(dirname+'_monitoring/bin%s.eps'%bin)
+        plt.close()
