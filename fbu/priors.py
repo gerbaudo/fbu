@@ -8,7 +8,7 @@ priors = {
 def wrapper(priorname='',low=0,up=100,size=1,other_args={}):
 
     name='truth%d'
-    default_args = dict(lower=low,upper=up)
+    default_args = dict(value=(up-low)/2,lower=low,upper=up)
     args = dict(default_args.items()+other_args.items())
     
     if priorname in priors: 
