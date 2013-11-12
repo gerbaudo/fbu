@@ -64,10 +64,10 @@ class PyFBU(object):
         mcmc.use_step_method(mc.AdaptiveMetropolis, truth)
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
-        self.trace = mcmc.trace("truth")[:]
+        self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(ndim)]
 
         if self.monitoring:
             import validation
             validation.plot(self.name,data,bkgd,resmat,self.trace,
-                                 self.lower,self.upper)
+                            self.lower,self.upper)
 

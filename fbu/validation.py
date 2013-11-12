@@ -7,7 +7,7 @@ def plot(dirname,data,bkgd,resmat,trace,lower=0,upper=0):
     if not os.path.exists(dirname+'_monitoring'):
         os.makedirs(dirname+'_monitoring')
     nbins = len(data)
-    bintrace = zip(*trace)
+    bintrace = trace
     for bin in xrange(nbins): 
         ax = plt.subplot(211)
         xx = bintrace[bin]
@@ -23,7 +23,7 @@ def plot(dirname,data,bkgd,resmat,trace,lower=0,upper=0):
         plt.vlines(data[bin],0.,ymean,linestyles='solid',colors='c',label='data')
         plt.xlim(xmin=0)
         plt.subplot(212)
-        x = arange(len(trace))
-        plt.plot(x,trace[:,bin],label='trace of bin %d'%bin)
+        x = arange(len(bintrace[bin]))
+        plt.plot(x,bintrace[bin],label='trace of bin %d'%bin)
         plt.savefig(dirname+'_monitoring/bin%s.eps'%bin)
         plt.close()

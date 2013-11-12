@@ -7,16 +7,18 @@ priors = {
 
 def wrapper(priorname='',low=0,up=100,size=1,other_args={}):
 
-    default_args = dict(name='truth',
-                        lower=low,
-                        upper=up,
-                        size=size)
+    name='truth%d'
+    default_args = dict(lower=low,upper=up)
     args = dict(default_args.items()+other_args.items())
     
     if priorname in priors: 
-        return priors[priorname](**args)
+        prior = priors[priorname] 
     elif hasattr(pymc,priorname):
-        return getattr(pymc,priorname)(**args)
+        prior = getattr(pymc,priorname)
     else:
         print 'WARNING: prior name not found! Falling back to DiscreteUniform...'
-        return pymc.DiscreteUniform(**args)
+        prior = pymc.DiscreteUniform
+
+    truthprior = [prior(name%bin,**args) for bin in xrange(size)]
+
+    return pymc.Container(truthprior)
