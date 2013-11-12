@@ -75,15 +75,14 @@ class PyFBU(object):
 
         #we don't have any control on this feature...
         #we cannot use them until we don't understand how to validate
-        # mcmc.use_step_method(mc.AdaptiveMetropolis, truth)
+        mcmc.use_step_method(mc.AdaptiveMetropolis, truth)
 
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
-        self.trace = mcmc.trace("truth")
+        self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(ndim)]
         self.bckgtrace = mcmc.trace('gaus_bckg')
         
         if self.monitoring:
             import validation
             validation.plot(self.name+'_monitoring',data,backgrounds,resmat,self.trace,
                             self.bckgtrace,self.lower,self.upper)
-
