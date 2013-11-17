@@ -1,6 +1,6 @@
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
-from numpy import mean,std,arange
+from numpy import mean,std,arange,array
 import pymc
 from pymc.Matplot import plot as mcplot
 
@@ -8,12 +8,19 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=0,upper=0):
     import os
     if not os.path.exists(dirname):
         os.makedirs(dirname)
+    dirname = os.path.normpath(dirname) + os.sep
 
-    mcplot(bckgtrace,common_scale=False)
-    plt.savefig(dirname+'/pymc_summary_bckgs.eps')
+    # overlay data and background
+    x = arange(0.5,len(data)+0.5)
+    plt.plot(x,data,'k',label='data',drawstyle='steps-mid')
+    plt.plot(x,array(bkgd).sum(axis=0),'b',label='background',drawstyle='steps-mid')
+    plt.ylim([0.,max(data)*1.3])
+    plt.xlim([0.,len(data)])
+    plt.savefig(dirname+'databckg.eps')
     plt.close()
-    mcplot(trace,common_scale=False)
-    plt.savefig(dirname+'/pymc_summary_bins.eps')
+
+    mcplot(bckgtrace,common_scale=False,suffix='_summary',path=dirname,format='eps')
+    mcplot(trace,common_scale=False,suffix='_summary',path=dirname,format='eps')
     plt.close()
 
     trace = trace[:]
@@ -38,5 +45,5 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=0,upper=0):
         plt.subplot(212)
         x = arange(len(trace))
         plt.plot(x,trace[:,bin],label='trace of bin %d'%bin)
-        plt.savefig(dirname+'/bin%s.eps'%bin)
+        plt.savefig(dirname+'bin%s.eps'%bin)
         plt.close()
