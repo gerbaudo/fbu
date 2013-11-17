@@ -5,7 +5,7 @@ import pymc
 from pymc.Matplot import plot as mcplot
 from pymc.Matplot import geweke_plot
 
-def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=0,upper=0):
+def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
     import os
     if not os.path.exists(dirname):
         os.makedirs(dirname)
@@ -49,7 +49,7 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=0,upper=0):
         plt.ylabel('Probability')
         plt.xlabel('Bin content')
         ymean = mean(ax.get_ylim())
-        plt.hlines(ymean,lower,upper,linestyles='dashed',colors='m',label='hyperbox')
+        plt.hlines(ymean,lower[bin],upper[bin],linestyles='dashed',colors='m',label='hyperbox')
         plt.vlines(data[bin],0.,ymean,linestyles='solid',colors='c',label='data')
         plt.xlim(xmin=0)
         plt.subplot(212)
