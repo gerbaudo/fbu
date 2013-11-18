@@ -71,7 +71,9 @@ def generateAndPlot() :
         And see for example
         http://stackoverflow.com/questions/7140738/numpy-divide-along-axis)
         """
-        return recoVsTruthCounts / np.sum(recoVsTruthCounts, axis=1)[:,np.newaxis]
+        den = np.sum(recoVsTruthCounts, axis=1)[:,np.newaxis]
+        den[den==0.0]=1.0 # avoid divide by zero; if all values in this row are zero, 0./1. is still 0.
+        return recoVsTruthCounts / den
 #return recoVsTruthCounts / truthCounts.astype('float')[:,np.newaxis]
     respMat = prMatrix(respHist)
     print 'respMat :'
