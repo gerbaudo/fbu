@@ -2,7 +2,6 @@ import pymc
 
 import tikhonov
 priors = {
-    'Tikhonov':tikhonov.tikhonov
     }
 
 def wrapper(priorname='',low=[],up=[],size=1,other_args={},optimized=False):
