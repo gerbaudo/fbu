@@ -39,8 +39,7 @@ if __name__ == "__main__":
     pyfbu.upper            = [140000]*ndim
     pyfbu.response         = json.load(open(jsonmig))
     pyfbu.background       = json.load(open(jsonbkg))
-    pyfbu.backgroundsyst = {'bckg':0.20}
-    pyfbu.monitoring = True
+    pyfbu.backgroundsyst = {'bckg':0.0}
     pyfbu.rndseed          = int(rndseed)
     pyfbu.verbose          = verbose
     pyfbu.monitoring = True
@@ -48,8 +47,13 @@ if __name__ == "__main__":
     pyfbu.run()
 
     trace = pyfbu.trace
+    from numpy import mean,std
+    mm = mean(trace,1)
+    ss = std(trace,1)
 
-#    AcList  = computeAc.computeAcList(trace)
-#    AcArray = np.array(AcList)
-#    meanAc  = np.mean(AcArray)
-#    stdAc   = np.std(AcArray)
+    pyfbu.lower            = mm-5*ss
+    pyfbu.upper            = mm+5*ss
+
+    pyfbu.name = 'optim'
+    pyfbu.backgroundsyst = {'bckg':0.1}
+    pyfbu.run()
