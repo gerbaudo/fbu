@@ -31,7 +31,7 @@ if __name__ == "__main__":
     pyfbu.nMCMC            = 10000
     pyfbu.nBurn            = 1000
     pyfbu.nThin            = 10
-#    pyfbu.prior            = 'Tikhonov'
+#    pyfbu.potential = 'Tikhonov'
     import json
     pyfbu.data             = json.load(open(jsondata))
     ndim = len(pyfbu.data)
