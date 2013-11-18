@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from numpy import mean,std,arange,array
 import pymc
 from pymc.Matplot import plot as mcplot
+from pymc.Matplot import geweke_plot
 
 def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=0,upper=0):
     import os
@@ -10,8 +11,9 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=0,upper=0):
         os.makedirs(dirname)
     dirname = os.path.normpath(dirname) + os.sep
 
+    ndim = len(data)
     # overlay data and background
-    x = arange(0.5,len(data)+0.5)
+    x = arange(0.5,ndim+0.5)
     plt.plot(x,data,'k',label='data',drawstyle='steps-mid')
     plt.plot(x,array(bkgd).sum(axis=0),'b',label='background',drawstyle='steps-mid')
     plt.ylim([0.,max(data)*1.3])
@@ -19,11 +21,20 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=0,upper=0):
     plt.savefig(dirname+'databckg.eps')
     plt.close()
 
+    # plot traces and autocorrelation
     mcplot(bckgtrace,common_scale=False,suffix='_summary',path=dirname,format='eps')
     mcplot(trace,common_scale=False,suffix='_summary',path=dirname,format='eps')
     plt.close()
 
+    # plot geweke test
     trace = trace[:]
+    scores = pymc.geweke(trace)
+    geweke_plot(scores,'truth',path=dirname,format='eps')
+    plt.close()
+    
+    # raftery lewis test
+    pymc.raftery_lewis(scores, q=0.975, r=0.005)
+
     bckgtrace = bckgtrace[:]
     nbins = len(data)
     bintrace = zip(*trace)
