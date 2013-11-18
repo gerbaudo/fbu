@@ -18,6 +18,8 @@ class PyFBU(object):
         self.upper = []   # upper sampling bound
         self.prior = 'DiscreteUniform'
         self.priorparams = {}
+        self.potential = ''
+        self.potentialparams = {}
         #                                     [begin numerical parameters]
         self.data        = None # data list
         self.response    = None # response matrix
@@ -57,6 +59,14 @@ class PyFBU(object):
                     totbckg[ii] += (1.+par*syst)*bckg[ii]
             return totbckg
 
+        # define potential to constrain truth spectrum
+        @mc.potential
+        def truthpot(truth=truth):
+            import potentials
+            return potentials.wrapper(self.potential,
+                                      truth,size=ndim,
+                                      other_args=self.potentialparams)
+        
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
         def unfold(truth=truth,gausparams=gausparams):
@@ -65,8 +75,7 @@ class PyFBU(object):
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=ndim)
-
-        model = mc.Model([unfolded, unfold, truth,gausparams])
+        model = mc.Model([unfolded, unfold, truth, truthpot, gausparams])
 
         map_ = mc.MAP( model ) # this call determines good initial MCMC values
         map_.fit()
