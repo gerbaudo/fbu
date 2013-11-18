@@ -14,8 +14,8 @@ class PyFBU(object):
         self.nMCMC = 100000 # N trials        [begin MCMC parameters]
         self.nBurn = 1000   # todo: describe
         self.nThin = 10     # todo: describe
-        self.lower = 1000   # lower sampling bound
-        self.upper = 1500   # upper sampling bound
+        self.lower = []   # lower sampling bound
+        self.upper = []   # upper sampling bound
         self.prior = 'DiscreteUniform'
         self.priorparams = {}
         #                                     [begin numerical parameters]
