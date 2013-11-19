@@ -28,18 +28,18 @@ if __name__ == "__main__":
     verbose = opts.verbose
 
     pyfbu = PyFBU()
-    pyfbu.nMCMC            = 10000
-    pyfbu.nBurn            = 1000
-    pyfbu.nThin            = 10
+    pyfbu.nMCMC            = 100000
+    pyfbu.nBurn            = 20000
+    pyfbu.nThin            = 1
 #    pyfbu.potential = 'Tikhonov'
     import json
     pyfbu.data             = json.load(open(jsondata))
     ndim = len(pyfbu.data)
-    pyfbu.lower            = [0]*ndim
+    pyfbu.lower            = [60000]*ndim
     pyfbu.upper            = [140000]*ndim
     pyfbu.response         = json.load(open(jsonmig))
     pyfbu.background       = json.load(open(jsonbkg))
-    pyfbu.backgroundsyst = {'bckg':0.1}
+    pyfbu.backgroundsyst = {'bckg':0.15}
     pyfbu.rndseed          = int(rndseed)
     pyfbu.verbose          = verbose
     pyfbu.monitoring = True
