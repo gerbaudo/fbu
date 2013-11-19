@@ -92,11 +92,12 @@ class PyFBU(object):
 
         mcmc = mc.MCMC( model )  # MCMC instance for model
 
-        for tt,low,up in zip(truth,self.lower,self.upper):
-            mcmc.use_step_method(mc.Metropolis, tt, proposal_distribution='Normal', proposal_sd=(up-low)/100)
-        for gaus in gausparams:
-            if not gaus.observed:
-                mcmc.use_step_method(mc.Metropolis, gaus, proposal_distribution='Normal', proposal_sd=0.1)
+#        for tt,low,up in zip(truth,self.lower,self.upper):
+#            mcmc.use_step_method(mc.Metropolis, tt, proposal_distribution='Normal', proposal_sd=(up-low)/100)
+#        for gaus in gausparams:
+#            if not gaus.observed:
+#                mcmc.use_step_method(mc.Metropolis, gaus, proposal_distribution='Normal', proposal_sd=0.1)
+        mcmc.use_step_method(mc.AdaptiveMetropolis,truth+gausparams)
         
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
