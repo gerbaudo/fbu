@@ -92,10 +92,12 @@ class PyFBU(object):
 
         mcmc = mc.MCMC( model )  # MCMC instance for model
 
-        #we don't have any control on this feature...
-        #we cannot use them until we don't understand how to validate
-#        mcmc.use_step_method(mc.Metropolis, truth, dist='Normal', sig=0.05)
-
+        for tt,low,up in zip(truth,self.lower,self.upper):
+            mcmc.use_step_method(mc.Metropolis, tt, proposal_distribution='Normal', proposal_sd=(up-low)/100)
+        for gaus in gausparams:
+            if not gaus.observed:
+                mcmc.use_step_method(mc.Metropolis, gaus, proposal_distribution='Normal', proposal_sd=0.1)
+        
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
         self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(ndim)]
