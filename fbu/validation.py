@@ -5,6 +5,24 @@ import pymc
 from pymc.Matplot import plot as mcplot
 from pymc.Matplot import geweke_plot
 
+def plothistandtrace(name,xx,lower,upper):
+    ax = plt.subplot(211)
+    mu = mean(xx)
+    sigma = std(xx)
+    n, bins, patches = plt.hist(xx, bins=50, normed=1, facecolor='green', alpha=0.5, histtype='stepfilled')
+    yy = mlab.normpdf(bins,mu,sigma)
+    plt.plot(bins,yy,'r-')
+    plt.ylabel('Probability')
+    plt.xlabel('Bin content')
+    ymean = mean(ax.get_ylim())
+    plt.hlines(ymean,lower,upper,linestyles='dashed',colors='m',label='hyperbox')
+    plt.subplot(212)
+    x = arange(len(xx))
+    plt.plot(x,xx,label='trace of %s'%name)
+    plt.savefig('%s.eps'%name)
+    plt.close()
+
+
 def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
     import os
     if not os.path.exists(dirname):
@@ -26,6 +44,9 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
     #mcplot(bckg,common_scale=False,suffix='_summary',path=dirname,format='eps')
     #plt.close()
 
+    for ii,bckg in enumerate(bckgtrace):
+        plothistandtrace(dirname+'bckg%d'%ii,bckg,-5.,5.)        
+
     nbins = len(data)
     for bin in xrange(nbins): 
         ## need to be fixed
@@ -39,24 +60,8 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
         # raftery lewis test
         pymc.raftery_lewis(scores, q=0.975, r=0.005)
 
-        ax = plt.subplot(211)
-        xx = trace[bin]
-        mu = mean(xx)
-        sigma = std(xx)
-        n, bins, patches = plt.hist(xx, bins=50, normed=1, facecolor='green', alpha=0.5, histtype='stepfilled')
-        yy = mlab.normpdf(bins,mu,sigma)
-        plt.plot(bins,yy,'r-')
-        plt.ylabel('Probability')
-        plt.xlabel('Bin content')
-        ymean = mean(ax.get_ylim())
-        plt.hlines(ymean,lower[bin],upper[bin],linestyles='dashed',colors='m',label='hyperbox')
-        plt.vlines(data[bin],0.,ymean,linestyles='solid',colors='c',label='data')
-        plt.xlim(xmin=0)
-        plt.subplot(212)
-        x = arange(len(trace[bin]))
-        plt.plot(x,trace[bin],label='trace of bin %d'%bin)
-        plt.savefig(dirname+'bin%s.eps'%bin)
-        plt.close()
+        plothistandtrace(dirname+'bin%d'%bin,trace[bin],lower[bin],upper[bin])
+
         for ii,bckg in enumerate(bckgtrace):
             plt.plot(trace[bin],bckg,',')
             plt.savefig(dirname+'bckg%d_bin%d.eps'%(ii,bin))
