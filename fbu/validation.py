@@ -22,10 +22,10 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
     plt.close()
 
     # plot traces and autocorrelation
-    mcplot(bckgtrace,common_scale=False,suffix='_summary',path=dirname,format='eps')
-    plt.close()
+    #for ii,bckg in enumerate(bckgtrace):
+    #mcplot(bckg,common_scale=False,suffix='_summary',path=dirname,format='eps')
+    #plt.close()
 
-    bckgtrace = bckgtrace[:]
     nbins = len(data)
     for bin in xrange(nbins): 
         ## need to be fixed
@@ -57,3 +57,7 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
         plt.plot(x,trace[bin],label='trace of bin %d'%bin)
         plt.savefig(dirname+'bin%s.eps'%bin)
         plt.close()
+        for ii,bckg in enumerate(bckgtrace):
+            plt.plot(trace[bin],bckg,',')
+            plt.savefig(dirname+'bckg%d_bin%d.eps'%(ii,bin))
+            plt.close()
