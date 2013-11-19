@@ -55,7 +55,7 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
 
         scores = pymc.geweke(trace[bin])
         # plot geweke test
-        geweke_plot(scores,'truth',path=dirname,format='eps')
+        geweke_plot(scores,'truth',path=dirname,format='eps',suffix='bin%d-geweke'%bin)
         plt.close()
         # raftery lewis test
         pymc.raftery_lewis(scores, q=0.975, r=0.005)
