@@ -49,7 +49,11 @@ class PyFBU(object):
                                     size=ndim,
                                     other_args=self.priorparams)
 
-        gausparams = mc.Normal('gaus_bckg',value=[0. for xx in backgrounds],mu=0,tau=1.0,size=len(backgrounds)) 
+        gausparams = []
+        for name,err in self.backgroundsyst.items():
+            gausparams.append( mc.Normal('gaus_%s'%name,value=0,mu=0,tau=1.0,
+                                         observed=(False if err>0.0 else True) ))
+        gausparams = mc.Container(gausparams)
 
         #NEEDS TO BE REWRITTEN WITH VECTORIZATION!!!!!
         def smear(backgrounds,params):
@@ -90,12 +94,15 @@ class PyFBU(object):
 
         #we don't have any control on this feature...
         #we cannot use them until we don't understand how to validate
-        mcmc.use_step_method(mc.AdaptiveMetropolis, truth)
+#        mcmc.use_step_method(mc.Metropolis, truth, dist='Normal', sig=0.05)
 
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
         self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(ndim)]
-        self.bckgtrace = mcmc.trace('gaus_bckg')
+        self.bckgtrace = []
+        for name,err in self.backgroundsyst.items():
+            if err>0.:
+                self.bckgtrace.append(mcmc.trace('gaus_%s'%name)[:])
         
         if self.monitoring:
             import validation
