@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='fbu',
-    version='0.0.1dev.4',
+    version='0.0.1dev.5',
     packages=['fbu',],
     license='LICENSE.txt',
     long_description=open('README.txt').read(),
@@ -11,3 +11,6 @@ setup(
     author_email='rubbo.francesco@gmail.com',
     )
     
+##to upload package
+## python setup.py sdist
+## python setup.py sdist upload
