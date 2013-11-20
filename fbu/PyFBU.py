@@ -10,33 +10,46 @@ class PyFBU(object):
     can be changed later on, but before calling the `run` method.
     """
     #__________________________________________________________
-    def __init__(self):
-        self.nMCMC = 100000 # N trials        [begin MCMC parameters]
-        self.nBurn = 1000   # todo: describe
-        self.nThin = 10     # todo: describe
-        self.lower = []   # lower sampling bound
-        self.upper = []   # upper sampling bound
+    def __init__(self,data=[],response=[],background={},backgroundsyst={},
+                 lower=[],upper=[],
+                 rndseed=-1,verbose=False,name='',monitoring=False):
+        #                                     [MCMC parameters]
+        self.nMCMC = 100000 # N of sampling points    
+        self.nBurn = 20000  # skip first N sampled points (MCMC learning period)
+        self.nThin = 1      # accept every other N sampled point (reduce autocorrelation)
+        self.lower = lower  # lower sampling bounds
+        self.upper = upper  # upper sampling bounds
+        #                                     [unfolding model parameters]
         self.prior = 'DiscreteUniform'
         self.priorparams = {}
         self.potential = ''
         self.potentialparams = {}
-        #                                     [begin numerical parameters]
-        self.data        = None # data list
-        self.response    = None # response matrix
-        self.background  = None # background dict
-        self.backgroundsyst = None
-        self.rndseed   = -1
-        self.stats     = None
-        self.trace     = None
-        self.verbose   = False
-        self.name      = '' 
-        self.monitoring = False
+        #                                     [input]
+        self.data        = data           # data list
+        self.response    = response       # response matrix
+        self.background  = background     # background dict
+        self.backgroundsyst = backgroundsyst
+        #                                     [settings]
+        self.rndseed   = rndseed
+        self.verbose   = verbose
+        self.name      = name
+        self.monitoring = monitoring
+    
+    #__________________________________________________________
+    def validateinput(self):
+        def checklen(list1,list2):
+            assert len(list1)==len(list2), 'Input Validation Error: inconstistent size of input'
+        response = [self.response]+[row for row in self.response]
+        for list in [self.lower,self.upper]+self.background.values()+response:
+            checklen(self.data,list)
+        
     #__________________________________________________________
     def fluctuate(self, data):
         random.seed(self.rndseed)
         return random.poisson(data)
     #__________________________________________________________
     def run(self):
+        self.validateinput()
         data = self.data
         data = self.fluctuate(data) if self.rndseed>=0 else data
         backgrounds = [self.background[syst] for syst in self.backgroundsyst] 
@@ -107,6 +120,6 @@ class PyFBU(object):
                 self.bckgtrace.append(mcmc.trace('gaus_%s'%name)[:])
         
         if self.monitoring:
-            import validation
-            validation.plot(self.name+'_monitoring',data,backgrounds,resmat,self.trace,
+            import monitoring
+            monitoring.plot(self.name+'_monitoring',data,backgrounds,resmat,self.trace,
                             self.bckgtrace,self.lower,self.upper)
