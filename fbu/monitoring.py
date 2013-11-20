@@ -29,6 +29,10 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
         os.makedirs(dirname)
     dirname = os.path.normpath(dirname) + os.sep
 
+    plt.imshow(resmat,interpolation='none',origin='lower',alpha=0.5)
+    plt.savefig(dirname+'resmat.eps')
+    plt.close()
+
     ndim = len(data)
     # overlay data and background
     x = arange(0.5,ndim+0.5)
