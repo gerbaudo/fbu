@@ -46,7 +46,6 @@ class PyFBU(object):
         import priors
         truth = priors.wrapper(priorname=self.prior,
                                     low=self.lower,up=self.upper,
-                                    size=ndim,
                                     other_args=self.priorparams)
 
         gausparams = []

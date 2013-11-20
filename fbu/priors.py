@@ -4,7 +4,7 @@ import tikhonov
 priors = {
     }
 
-def wrapper(priorname='',low=[],up=[],size=1,other_args={},optimized=False):
+def wrapper(priorname='',low=[],up=[],other_args={},optimized=False):
 
     
     if priorname in priors: 
