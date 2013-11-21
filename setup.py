@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='fbu',
-    version='0.0.1dev.5',
+    version='0.0.1dev.6',
     packages=['fbu',],
     license='LICENSE.txt',
     long_description=open('README.txt').read(),
