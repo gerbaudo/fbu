@@ -37,7 +37,8 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
     # overlay data and background
     x = arange(0.5,ndim+0.5)
     plt.plot(x,data,'k',label='data',drawstyle='steps-mid')
-    plt.plot(x,array(bkgd).sum(axis=0),'b',label='background',drawstyle='steps-mid')
+    if len(bkgd)>0:
+        plt.plot(x,array(bkgd).sum(axis=0),'b',label='background',drawstyle='steps-mid')
     plt.ylim([0.,max(data)*1.3])
     plt.xlim([0.,len(data)])
     plt.savefig(dirname+'databckg.eps')
