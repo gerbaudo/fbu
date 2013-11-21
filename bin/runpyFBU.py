@@ -10,7 +10,7 @@ from optparse import OptionParser
 if __name__ == "__main__":
     projectdir = os.path.dirname(os.path.abspath(__file__)).replace('/bin','/')
     datadir = projectdir+'tests/linearity/data/mc11/'
-    defaultdata = datadir+'data.json'
+    defaultdata = datadir+'dataA2pos.json'
     defaultmig  = datadir+'migrations.json'
     defaultbkg  = datadir+'background.json'
     usage = "usage: %prog -t python/unfold_template.py [options]"
@@ -29,24 +29,35 @@ if __name__ == "__main__":
 
     pyfbu = PyFBU()
     pyfbu.nMCMC            = 100000
-    pyfbu.nBurn            = 1000
-    pyfbu.nThin            = 10
-    pyfbu.lower            = 0
-    pyfbu.upper            = 140000
-#    pyfbu.prior            = 'Tikhonov'
+    pyfbu.nBurn            = 20000
+    pyfbu.nThin            = 1
+#    pyfbu.potential = 'Tikhonov'
     import json
     pyfbu.data             = json.load(open(jsondata))
+    ndim = len(pyfbu.data)
+    pyfbu.lower            = [60000]*ndim
+    pyfbu.upper            = [140000]*ndim
     pyfbu.response         = json.load(open(jsonmig))
     pyfbu.background       = json.load(open(jsonbkg))
+    pyfbu.backgroundsyst = {'bckg':0.15}
     pyfbu.rndseed          = int(rndseed)
     pyfbu.verbose          = verbose
     pyfbu.monitoring = True
     pyfbu.name = 'test'
     pyfbu.run()
 
-    trace = pyfbu.trace
-
-#    AcList  = computeAc.computeAcList(trace)
-#    AcArray = np.array(AcList)
-#    meanAc  = np.mean(AcArray)
-#    stdAc   = np.std(AcArray)
+    if False:
+        trace = pyfbu.trace
+        from numpy import mean,std
+        mm = mean(trace,1)
+        ss = std(trace,1)
+        
+        pyfbu.lower            = mm-5*ss
+        pyfbu.upper            = mm+5*ss
+        
+        pyfbu.name = 'optim'
+        pyfbu.backgroundsyst = {'bckg':0.1}
+        pyfbu.nMCMC            = 500000
+        pyfbu.nBurn            = 1000
+        pyfbu.nThin            = 50
+        pyfbu.run()

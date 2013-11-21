@@ -2,21 +2,25 @@ import pymc
 
 import tikhonov
 priors = {
-    'Tikhonov':tikhonov.tikhonov
     }
 
-def wrapper(priorname='',low=0,up=100,size=1,other_args={}):
+def wrapper(priorname='',low=[],up=[],other_args={},optimized=False):
 
-    default_args = dict(name='truth',
-                        lower=low,
-                        upper=up,
-                        size=size)
-    args = dict(default_args.items()+other_args.items())
     
     if priorname in priors: 
-        return priors[priorname](**args)
+        priormethod = priors[priorname] 
     elif hasattr(pymc,priorname):
-        return getattr(pymc,priorname)(**args)
+        priormethod = getattr(pymc,priorname)
     else:
         print 'WARNING: prior name not found! Falling back to DiscreteUniform...'
-        return pymc.DiscreteUniform(**args)
+        priormethod = pymc.DiscreteUniform
+
+    truthprior = []
+    for bin,(l,u) in enumerate(zip(low,up)):
+        name = 'truth%d'%bin
+        default_args = dict(name=name,value=l+(u-l)/2,lower=l,upper=u)
+        args = dict(default_args.items()+other_args.items())
+        prior = priormethod(**args)
+        truthprior.append(prior)
+
+    return pymc.Container(truthprior)
