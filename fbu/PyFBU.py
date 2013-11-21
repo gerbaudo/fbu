@@ -1,5 +1,5 @@
 import pymc as mc
-from numpy import random, dot, array, empty
+from numpy import random, dot, array
 
 class PyFBU(object):
     """A class to perform a MCMC sampling.
@@ -52,7 +52,8 @@ class PyFBU(object):
         self.validateinput()
         data = self.data
         data = self.fluctuate(data) if self.rndseed>=0 else data
-        backgrounds = [self.background[syst] for syst in self.backgroundsyst] 
+        backgrounds = [array(self.background[syst]) for syst in self.backgroundsyst]
+        backgroundsysts = array(self.backgroundsyst.values())
         ndim = len(data)
         resmat = self.response
 
@@ -66,14 +67,6 @@ class PyFBU(object):
             gausparams.append( mc.Normal('gaus_%s'%name,value=0,mu=0,tau=1.0,
                                          observed=(False if err>0.0 else True) ))
         gausparams = mc.Container(gausparams)
-
-        #NEEDS TO BE REWRITTEN WITH VECTORIZATION!!!!!
-        def smear(backgrounds,params):
-            totbckg = [0]*ndim
-            for syst,par,bckg in zip(self.backgroundsyst.values(),params,backgrounds):
-                for ii in xrange(ndim):
-                    totbckg[ii] += (1.+par*syst)*bckg[ii]
-            return totbckg
 
         # define potential to constrain truth spectrum
         import potentials
@@ -92,7 +85,7 @@ class PyFBU(object):
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
         def unfold(truth=truth,gausparams=gausparams):
-            bckg = smear(backgrounds,gausparams)
+            bckg = dot(1.+gausparams*backgroundsysts,backgrounds)
             out = bckg + dot(truth, resmat)
             return out
 
