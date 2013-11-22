@@ -10,7 +10,7 @@ class PyFBU(object):
     can be changed later on, but before calling the `run` method.
     """
     #__________________________________________________________
-    def __init__(self,data=[],response=[],background={},backgroundsyst={},
+    def __init__(self,data=[],response=[],background={},backgroundsyst={},objsyst={},
                  lower=[],upper=[],
                  rndseed=-1,verbose=False,name='',monitoring=False):
         #                                     [MCMC parameters]
@@ -29,6 +29,7 @@ class PyFBU(object):
         self.response    = response       # response matrix
         self.background  = background     # background dict
         self.backgroundsyst = backgroundsyst
+        self.objsyst        = objsyst
         #                                     [settings]
         self.rndseed   = rndseed
         self.verbose   = verbose
@@ -54,6 +55,7 @@ class PyFBU(object):
         data = self.fluctuate(data) if self.rndseed>=0 else data
         backgrounds = [array(self.background[syst]) for syst in self.backgroundsyst]
         backgroundsysts = array(self.backgroundsyst.values())
+        objsysts = array(self.objsyst.values())
         ndim = len(data)
         resmat = self.response
 
@@ -62,11 +64,14 @@ class PyFBU(object):
                                     low=self.lower,up=self.upper,
                                     other_args=self.priorparams)
 
-        bckgparams = []
-        for name,err in self.backgroundsyst.items():
-            bckgparams.append( mc.Normal('gaus_%s'%name,value=0,mu=0,tau=1.0,
-                                         observed=(False if err>0.0 else True) ))
+        bckgparams = [ mc.Normal('gaus_%s'%name,value=0.,mu=0.,tau=1.0,
+                                 observed=(False if err>0.0 else True) )
+                       for name,err in self.backgroundsyst.items() ]
         bckgparams = mc.Container(bckgparams)
+
+        objparams = [ mc.Normal('gaus_%s'%name,value=0.,mu=0.,tau=1.0)
+                      for name,err in self.objsyst.items()]
+        objparams = mc.Container(objparams)
 
         # define potential to constrain truth spectrum
         import potentials
@@ -84,13 +89,16 @@ class PyFBU(object):
         
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
-        def unfold(truth=truth,bckgparams=bckgparams):
-            bckg = dot(1.+bckgparams*backgroundsysts,backgrounds)
-            out = bckg + dot(truth, resmat)
+        def unfold(truth=truth,bckgparams=bckgparams,objparams=objparams):
+            bckg = dot(1. + bckgparams*backgroundsysts,backgrounds)
+            reco = dot(truth, resmat)
+            smear = 1. + dot(objparams,objsysts)
+            out = (bckg + reco)*smear
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=ndim)
-        model = mc.Model([unfolded, unfold, truth, truthpot, bckgparams])
+        gausparams = mc.Container(bckgparams + objparams)
+        model = mc.Model([unfolded, unfold, truth, truthpot, gausparams])
 
         map_ = mc.MAP( model ) # this call determines good initial MCMC values
         map_.fit()
@@ -99,11 +107,12 @@ class PyFBU(object):
 
 #        for tt,low,up in zip(truth,self.lower,self.upper):
 #            mcmc.use_step_method(mc.Metropolis, tt, proposal_distribution='Normal', proposal_sd=(up-low)/100)
-#        for gaus in gausparams:
+#        for gaus in bckgparams+objparams:
 #            if not gaus.observed:
 #                mcmc.use_step_method(mc.Metropolis, gaus, proposal_distribution='Normal', proposal_sd=0.1)
-        mcmc.use_step_method(mc.AdaptiveMetropolis,truth+bckgparams)
+#        mcmc.sample(5000)
         
+        mcmc.use_step_method(mc.AdaptiveMetropolis,truth+gausparams)
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
         self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(ndim)]
