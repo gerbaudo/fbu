@@ -63,10 +63,11 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
         geweke_plot(scores,'truth',path=dirname,format='eps',suffix='bin%d-geweke'%bin)
         plt.close()
         # raftery lewis test
-        pymc.raftery_lewis(scores, q=0.975, r=0.005)
+##not very useful
+##        pymc.raftery_lewis(scores, q=0.975, r=0.005)
 
         plothistandtrace(dirname+'bin%d'%bin,trace[bin],lower[bin],upper[bin])
-
+        
         for ii,bckg in enumerate(bckgtrace):
             plt.plot(trace[bin],bckg,',')
             plt.savefig(dirname+'bckg%d_bin%d.eps'%(ii,bin))
