@@ -116,12 +116,15 @@ class PyFBU(object):
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
         self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(ndim)]
-        self.bckgtrace = []
+        self.nuisancetrace = {}
         for name,err in self.backgroundsyst.items():
             if err>0.:
-                self.bckgtrace.append(mcmc.trace('gaus_%s'%name)[:])
+                self.nuisancetrace[name] = mcmc.trace('gaus_%s'%name)[:]
+        for name in self.objsyst.keys():
+            self.nuisancetrace[name] = mcmc.trace('gaus_%s'%name)[:]
         
+
         if self.monitoring:
             import monitoring
             monitoring.plot(self.name+'_monitoring',data,backgrounds,resmat,self.trace,
-                            self.bckgtrace,self.lower,self.upper)
+                            self.nuisancetrace,self.lower,self.upper)
