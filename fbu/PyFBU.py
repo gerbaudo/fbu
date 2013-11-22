@@ -62,11 +62,11 @@ class PyFBU(object):
                                     low=self.lower,up=self.upper,
                                     other_args=self.priorparams)
 
-        gausparams = []
+        bckgparams = []
         for name,err in self.backgroundsyst.items():
-            gausparams.append( mc.Normal('gaus_%s'%name,value=0,mu=0,tau=1.0,
+            bckgparams.append( mc.Normal('gaus_%s'%name,value=0,mu=0,tau=1.0,
                                          observed=(False if err>0.0 else True) ))
-        gausparams = mc.Container(gausparams)
+        bckgparams = mc.Container(bckgparams)
 
         # define potential to constrain truth spectrum
         import potentials
@@ -84,13 +84,13 @@ class PyFBU(object):
         
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
-        def unfold(truth=truth,gausparams=gausparams):
-            bckg = dot(1.+gausparams*backgroundsysts,backgrounds)
+        def unfold(truth=truth,bckgparams=bckgparams):
+            bckg = dot(1.+bckgparams*backgroundsysts,backgrounds)
             out = bckg + dot(truth, resmat)
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=ndim)
-        model = mc.Model([unfolded, unfold, truth, truthpot, gausparams])
+        model = mc.Model([unfolded, unfold, truth, truthpot, bckgparams])
 
         map_ = mc.MAP( model ) # this call determines good initial MCMC values
         map_.fit()
@@ -102,7 +102,7 @@ class PyFBU(object):
 #        for gaus in gausparams:
 #            if not gaus.observed:
 #                mcmc.use_step_method(mc.Metropolis, gaus, proposal_distribution='Normal', proposal_sd=0.1)
-        mcmc.use_step_method(mc.AdaptiveMetropolis,truth+gausparams)
+        mcmc.use_step_method(mc.AdaptiveMetropolis,truth+bckgparams)
         
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
