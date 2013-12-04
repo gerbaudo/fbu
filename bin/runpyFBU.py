@@ -35,12 +35,13 @@ if __name__ == "__main__":
     import json
     pyfbu.data             = json.load(open(jsondata))
     ndim = len(pyfbu.data)
-    pyfbu.lower            = [40000]*ndim
-    pyfbu.upper            = [160000]*ndim
+    pyfbu.lower            = [20000]*ndim
+    pyfbu.upper            = [180000]*ndim
     pyfbu.response         = json.load(open(jsonmig))
     pyfbu.background       = json.load(open(jsonbkg))
     pyfbu.backgroundsyst = {'bckg':0.}
-#    pyfbu.objsyst = {'jes':[0.05,0.03,0.03,0.05]}
+    pyfbu.objsyst = {'jes':[0.05,0.03,0.03,0.05]}
+#    pyfbu.objsystfixsigma = -1.
     pyfbu.rndseed          = int(rndseed)
     pyfbu.verbose          = verbose
     pyfbu.monitoring = True
