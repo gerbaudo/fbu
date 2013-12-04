@@ -30,6 +30,7 @@ class PyFBU(object):
         self.background  = background     # background dict
         self.backgroundsyst = backgroundsyst
         self.objsyst        = objsyst
+        self.objsystfixsigma = 0.
         #                                     [settings]
         self.rndseed   = rndseed
         self.verbose   = verbose
@@ -69,7 +70,8 @@ class PyFBU(object):
                        for name,err in self.backgroundsyst.items() ]
         bckgparams = mc.Container(bckgparams)
 
-        objparams = [ mc.Normal('gaus_%s'%name,value=0.,mu=0.,tau=1.0)
+        objparams = [ mc.Normal('gaus_%s'%name,value=self.objsystfixsigma,mu=0.,tau=1.0,
+                                observed=(True if self.objsystfixsigma!=0 else False))
                       for name,err in self.objsyst.items()]
         objparams = mc.Container(objparams)
 
@@ -121,7 +123,8 @@ class PyFBU(object):
             if err>0.:
                 self.nuisancetrace[name] = mcmc.trace('gaus_%s'%name)[:]
         for name in self.objsyst.keys():
-            self.nuisancetrace[name] = mcmc.trace('gaus_%s'%name)[:]
+            if self.objsystfixsigma==0.:
+                self.nuisancetrace[name] = mcmc.trace('gaus_%s'%name)[:]
         
 
         if self.monitoring:
