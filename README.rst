@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/gerbaudo/fbu.png)](https://travis-ci.org/gerbaudo/fbu)
+.. image:: https://travis-ci.org/gerbaudo/fbu.png
+   :target: https://travis-ci.org/gerbaudo/fbu
 
 ========================
 Fully Bayesian Unfolding
