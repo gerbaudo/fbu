@@ -2,7 +2,7 @@ from distutils.core import setup
 
 DISTNAME = 'fbu'
 DESCRIPTION = "PyFBU"
-VERSION = '0.0.1dev.8'
+VERSION = '0.0.1dev.9'
 AUTHOR = 'Davide Gerbaudo, Clement Helsens and Francesco Rubbo'
 AUTHOR_EMAIL = 'rubbo.francesco@gmail.com'
 URL = 'https://github.com/gerbaudo/fbu'
