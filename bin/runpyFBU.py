@@ -40,8 +40,8 @@ if __name__ == "__main__":
     pyfbu.response         = json.load(open(jsonmig))
     pyfbu.background       = json.load(open(jsonbkg))
     pyfbu.backgroundsyst = {'bckg':0.}
-    pyfbu.objsyst = {'jes':[0.05,0.03,0.03,0.05]}
-#    pyfbu.objsystfixsigma = -1.
+#    pyfbu.objsyst = {'jes':[0.05,0.03,0.03,0.05]}
+#    pyfbu.systfixsigma = -1.
     pyfbu.rndseed          = int(rndseed)
     pyfbu.verbose          = verbose
     pyfbu.monitoring = True
