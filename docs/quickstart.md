@@ -16,7 +16,9 @@ The recommended installation is with virtualenv.
 First time:
 
 ```
-git clone git@github.com:gerbaudo/fbu.git
+git clone https://github.com/gerbaudo/fbu.git
+# or, if you have a github account:
+# git clone git@github.com:gerbaudo/fbu.git
 virtualenv fbu
 cd fbu
 source bin/activate
