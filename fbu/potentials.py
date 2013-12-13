@@ -1,10 +1,10 @@
 import pymc
 
-import tikhonov
 def dummy(**args): return 0. 
+from tikhonov import tikhonov
 potentialdict = {
     '' : dummy,
-    'Tikhonov':tikhonov.tikhonov,
+    'Tikhonov':tikhonov,
     }
 
 def wrapper(potname='',truth=None,size=1,other_args={}):

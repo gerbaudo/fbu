@@ -1,5 +1,3 @@
-import pymc
-import numpy
 from math import fabs
 
 def tikhonov(value,size=4,refcurv=6.1e05,alpha=1e-8):

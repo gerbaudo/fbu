@@ -1,6 +1,5 @@
 import pymc
 
-import tikhonov
 priors = {
     }
 
