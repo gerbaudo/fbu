@@ -9,7 +9,8 @@ def plothistandtrace(name,xx,lower,upper):
     ax = plt.subplot(211)
     mu = mean(xx)
     sigma = std(xx)
-    n, bins, patches = plt.hist(xx, bins=50, normed=1, facecolor='green', alpha=0.5, histtype='stepfilled')
+    n, bins, patches = plt.hist(xx, bins=50, normed=1, facecolor='green', 
+                                alpha=0.5, histtype='stepfilled')
     yy = mlab.normpdf(bins,mu,sigma)
     plt.plot(bins,yy,'r-')
     plt.ylabel('Probability')
@@ -23,7 +24,7 @@ def plothistandtrace(name,xx,lower,upper):
     plt.close()
 
 
-def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
+def plot(dirname,data,bkgd,resmat,trace,nuisancetrace,lower=[],upper=[]):
     import os
     if not os.path.exists(dirname):
         os.makedirs(dirname)
@@ -49,8 +50,8 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
     #mcplot(bckg,common_scale=False,suffix='_summary',path=dirname,format='eps')
     #plt.close()
 
-    for ii,bckg in enumerate(bckgtrace):
-        plothistandtrace(dirname+'bckg%d'%ii,bckg,-5.,5.)        
+    for name,nuisance in nuisancetrace.items():
+        plothistandtrace(dirname+name,nuisance,-5.,5.)        
 
     nbins = len(data)
     for bin in xrange(nbins): 
@@ -63,11 +64,12 @@ def plot(dirname,data,bkgd,resmat,trace,bckgtrace,lower=[],upper=[]):
         geweke_plot(scores,'truth',path=dirname,format='eps',suffix='bin%d-geweke'%bin)
         plt.close()
         # raftery lewis test
-        pymc.raftery_lewis(scores, q=0.975, r=0.005)
+##not very useful
+##        pymc.raftery_lewis(scores, q=0.975, r=0.005)
 
         plothistandtrace(dirname+'bin%d'%bin,trace[bin],lower[bin],upper[bin])
-
-        for ii,bckg in enumerate(bckgtrace):
-            plt.plot(trace[bin],bckg,',')
-            plt.savefig(dirname+'bckg%d_bin%d.eps'%(ii,bin))
+        
+        for name,nuisance in nuisancetrace.items():
+            plt.plot(trace[bin],nuisance,',')
+            plt.savefig(dirname+'%s_bin%d.eps'%(name,bin))
             plt.close()

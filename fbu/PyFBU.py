@@ -10,7 +10,7 @@ class PyFBU(object):
     can be changed later on, but before calling the `run` method.
     """
     #__________________________________________________________
-    def __init__(self,data=[],response=[],background={},backgroundsyst={},
+    def __init__(self,data=[],response=[],background={},backgroundsyst={},objsyst={},
                  lower=[],upper=[],
                  rndseed=-1,verbose=False,name='',monitoring=False):
         #                                     [MCMC parameters]
@@ -29,6 +29,8 @@ class PyFBU(object):
         self.response    = response       # response matrix
         self.background  = background     # background dict
         self.backgroundsyst = backgroundsyst
+        self.objsyst        = objsyst
+        self.objsystfixsigma = 0.
         #                                     [settings]
         self.rndseed   = rndseed
         self.verbose   = verbose
@@ -54,6 +56,7 @@ class PyFBU(object):
         data = self.fluctuate(data) if self.rndseed>=0 else data
         backgrounds = [array(self.background[syst]) for syst in self.backgroundsyst]
         backgroundsysts = array(self.backgroundsyst.values())
+        objsysts = array(self.objsyst.values())
         ndim = len(data)
         resmat = self.response
 
@@ -62,11 +65,15 @@ class PyFBU(object):
                                     low=self.lower,up=self.upper,
                                     other_args=self.priorparams)
 
-        gausparams = []
-        for name,err in self.backgroundsyst.items():
-            gausparams.append( mc.Normal('gaus_%s'%name,value=0,mu=0,tau=1.0,
-                                         observed=(False if err>0.0 else True) ))
-        gausparams = mc.Container(gausparams)
+        bckgparams = [ mc.Normal('gaus_%s'%name,value=0.,mu=0.,tau=1.0,
+                                 observed=(False if err>0.0 else True) )
+                       for name,err in self.backgroundsyst.items() ]
+        bckgparams = mc.Container(bckgparams)
+
+        objparams = [ mc.Normal('gaus_%s'%name,value=self.objsystfixsigma,mu=0.,tau=1.0,
+                                observed=(True if self.objsystfixsigma!=0 else False))
+                      for name,err in self.objsyst.items()]
+        objparams = mc.Container(objparams)
 
         # define potential to constrain truth spectrum
         import potentials
@@ -84,12 +91,15 @@ class PyFBU(object):
         
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
-        def unfold(truth=truth,gausparams=gausparams):
-            bckg = dot(1.+gausparams*backgroundsysts,backgrounds)
-            out = bckg + dot(truth, resmat)
+        def unfold(truth=truth,bckgparams=bckgparams,objparams=objparams):
+            bckg = dot(1. + bckgparams*backgroundsysts,backgrounds)
+            reco = dot(truth, resmat)
+            smear = 1. + dot(objparams,objsysts)
+            out = (bckg + reco)*smear
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=ndim)
+        gausparams = mc.Container(bckgparams + objparams)
         model = mc.Model([unfolded, unfold, truth, truthpot, gausparams])
 
         map_ = mc.MAP( model ) # this call determines good initial MCMC values
@@ -99,20 +109,25 @@ class PyFBU(object):
 
 #        for tt,low,up in zip(truth,self.lower,self.upper):
 #            mcmc.use_step_method(mc.Metropolis, tt, proposal_distribution='Normal', proposal_sd=(up-low)/100)
-#        for gaus in gausparams:
+#        for gaus in bckgparams+objparams:
 #            if not gaus.observed:
 #                mcmc.use_step_method(mc.Metropolis, gaus, proposal_distribution='Normal', proposal_sd=0.1)
-        mcmc.use_step_method(mc.AdaptiveMetropolis,truth+gausparams)
+#        mcmc.sample(5000)
         
+        mcmc.use_step_method(mc.AdaptiveMetropolis,truth+gausparams)
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
         self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(ndim)]
-        self.bckgtrace = []
+        self.nuisancetrace = {}
         for name,err in self.backgroundsyst.items():
             if err>0.:
-                self.bckgtrace.append(mcmc.trace('gaus_%s'%name)[:])
+                self.nuisancetrace[name] = mcmc.trace('gaus_%s'%name)[:]
+        for name in self.objsyst.keys():
+            if self.objsystfixsigma==0.:
+                self.nuisancetrace[name] = mcmc.trace('gaus_%s'%name)[:]
         
+
         if self.monitoring:
             import monitoring
             monitoring.plot(self.name+'_monitoring',data,backgrounds,resmat,self.trace,
-                            self.bckgtrace,self.lower,self.upper)
+                            self.nuisancetrace,self.lower,self.upper)
