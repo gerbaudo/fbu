@@ -30,7 +30,7 @@ class PyFBU(object):
         self.background  = background     # background dict
         self.backgroundsyst = backgroundsyst
         self.objsyst        = objsyst
-        self.objsystfixsigma = 0.
+        self.systfixsigma = 0.
         #                                     [settings]
         self.rndseed   = rndseed
         self.verbose   = verbose
@@ -65,15 +65,15 @@ class PyFBU(object):
                                     low=self.lower,up=self.upper,
                                     other_args=self.priorparams)
 
-        bckgparams = [ mc.Normal('gaus_%s'%name,value=0.,mu=0.,tau=1.0,
-                                 observed=(False if err>0.0 else True) )
-                       for name,err in self.backgroundsyst.items() ]
-        bckgparams = mc.Container(bckgparams)
-
-        objparams = [ mc.Normal('gaus_%s'%name,value=self.objsystfixsigma,mu=0.,tau=1.0,
-                                observed=(True if self.objsystfixsigma!=0 else False))
-                      for name,err in self.objsyst.items()]
-        objparams = mc.Container(objparams)
+        bckgnuisances = [ mc.Normal('gaus_%s'%name,value=0.,mu=0.,tau=1.0,
+                                    observed=(False if err>0.0 else True) )
+                          for name,err in self.backgroundsyst.items() ]
+        bckgnuisances = mc.Container(bckgnuisances)
+        
+        objnuisances = [ mc.Normal('gaus_%s'%name,value=self.systfixsigma,mu=0.,tau=1.0,
+                                   observed=(True if self.systfixsigma!=0 else False))
+                         for name,err in self.objsyst.items()]
+        objnuisances = mc.Container(objnuisances)
 
         # define potential to constrain truth spectrum
         import potentials
@@ -91,16 +91,16 @@ class PyFBU(object):
         
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
-        def unfold(truth=truth,bckgparams=bckgparams,objparams=objparams):
-            bckg = dot(1. + bckgparams*backgroundsysts,backgrounds)
+        def unfold(truth=truth,bckgnuisances=bckgnuisances,objnuisances=objnuisances):
+            bckg = dot(1. + bckgnuisances*backgroundsysts,backgrounds)
             reco = dot(truth, resmat)
-            smear = 1. + dot(objparams,objsysts)
+            smear = 1. + dot(objnuisances,objsysts)
             out = (bckg + reco)*smear
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=ndim)
-        gausparams = mc.Container(bckgparams + objparams)
-        model = mc.Model([unfolded, unfold, truth, truthpot, gausparams])
+        allnuisances = mc.Container(bckgnuisances + objnuisances)
+        model = mc.Model([unfolded, unfold, truth, truthpot, allnuisances])
 
         map_ = mc.MAP( model ) # this call determines good initial MCMC values
         map_.fit()
@@ -114,20 +114,20 @@ class PyFBU(object):
 #                mcmc.use_step_method(mc.Metropolis, gaus, proposal_distribution='Normal', proposal_sd=0.1)
 #        mcmc.sample(5000)
         
-        mcmc.use_step_method(mc.AdaptiveMetropolis,truth+gausparams)
+        mcmc.use_step_method(mc.AdaptiveMetropolis,truth+allnuisances)
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
         self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(ndim)]
-        self.nuisancetrace = {}
+        self.nuisancestrace = {}
         for name,err in self.backgroundsyst.items():
             if err>0.:
-                self.nuisancetrace[name] = mcmc.trace('gaus_%s'%name)[:]
+                self.nuisancestrace[name] = mcmc.trace('gaus_%s'%name)[:]
         for name in self.objsyst.keys():
-            if self.objsystfixsigma==0.:
-                self.nuisancetrace[name] = mcmc.trace('gaus_%s'%name)[:]
+            if self.systfixsigma==0.:
+                self.nuisancestrace[name] = mcmc.trace('gaus_%s'%name)[:]
         
 
         if self.monitoring:
             import monitoring
             monitoring.plot(self.name+'_monitoring',data,backgrounds,resmat,self.trace,
-                            self.nuisancetrace,self.lower,self.upper)
+                            self.nuisancestrace,self.lower,self.upper)
