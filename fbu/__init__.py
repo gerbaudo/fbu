@@ -1,1 +1,1 @@
-import tikhonov, priors, PyFBU
+from .PyFBU import PyFBU
