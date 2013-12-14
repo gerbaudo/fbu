@@ -1,4 +1,4 @@
-. image:: https://travis-ci.org/gerbaudo/fbu.png
+.. image:: https://travis-ci.org/gerbaudo/fbu.png
    :target: https://travis-ci.org/gerbaudo/fbu
 
 =====
@@ -12,7 +12,7 @@ The software is based on the Markov Chain Monte Carlo sampling toolkit PyMC.
 Dependencies
 ------------
 
-PyFBU is tested on Python 2.7 and depends on NumPy, Matplotlib and PyMC.
+PyFBU is tested on Python 2.6/2.7 and depends on NumPy, Matplotlib and PyMC.
 
 Installation
 ------------
@@ -32,11 +32,32 @@ Install NumPy-1.7.0 (this may take a while).
 	pip install numpy==1.7.0
 
 
-The latest version of PyFBU can be installed using pip.
+Pip installation
+~~~~~~~~~~~~~~~~
+
+The latest stable version of PyFBU can be installed using pip.
 
 ::
  
     pip install fbu
 
-This will also automatically install the other missing dependencies
-(this might take another while, up to several minutes...and lots of printout).
+This will also automatically install other missing dependencies
+(this might take another while, up to several minutes...).
+
+Git clone
+~~~~~~~~~
+
+One can also check out the development version of the code from the 
+`GitHub <https://github.com/gerbaudo/fbu>`_ repository:
+
+::
+
+	git clone https://github.com/gerbaudo/fbu.git
+
+and follow the `quickstart <https://github.com/gerbaudo/fbu/blob/master/docs/quickstart.md>`_ 
+instructions.
+
+
+Usage
+-----
+
