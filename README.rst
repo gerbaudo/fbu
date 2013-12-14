@@ -7,7 +7,8 @@ PyFBU
 
 Implementation of the Fully Bayesian Unfolding algorithm described in
 `physics.data-an/1201.4612 <http://arxiv.org/abs/1201.4612>`_.
-The software is based on the Markov Chain Monte Carlo sampling toolkit PyMC.
+The software is based on the Markov Chain Monte Carlo sampling toolkit 
+`PyMC<http://pymc-devs.github.io/pymc/>`_.
 
 Dependencies
 ------------
