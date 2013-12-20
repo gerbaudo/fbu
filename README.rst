@@ -62,5 +62,5 @@ instructions.
 Usage
 -----
 
-A `simple tutorial <http://nbviewer.ipython.org/github/gerbaudo/fbu/blob/master/fbututorial.ipynb>`_
+A `simple tutorial <http://nbviewer.ipython.org/github/gerbaudo/fbu/blob/master/tutorial.ipynb>`_
 to help you get started.
