@@ -48,7 +48,7 @@ This will also automatically install other missing dependencies
 Git clone
 ~~~~~~~~~
 
-One can also check out the development version of the code from the 
+Alternatively one can check out the development version of the code from the 
 `GitHub <https://github.com/gerbaudo/fbu>`_ repository:
 
 ::
@@ -62,5 +62,5 @@ instructions.
 Usage
 -----
 
-A `simple tutorial <http://nbviewer.ipython.org/github/gerbaudo/fbu/blob/improvereadme/fbututorial.ipynb>`_
+A `simple tutorial <http://nbviewer.ipython.org/github/gerbaudo/fbu/blob/master/fbututorial.ipynb>`_
 to help you get started.
