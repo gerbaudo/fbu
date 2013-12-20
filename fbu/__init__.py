@@ -7,3 +7,5 @@ except ImportError:
         'NumPy does not seem to be installed. Please see the installation guide.')
 
 from .PyFBU import PyFBU
+
+from .tests import test

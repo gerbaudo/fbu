@@ -21,7 +21,7 @@ required = ['numpy==1.7.0','scipy>=0.12.0','matplotlib>=1.2.1','pymc==2.3']
 setup(
     name=DISTNAME,
     version=VERSION,
-    packages=['fbu',],
+    packages=['fbu','fbu.tests'],
     license='LICENSE.txt',
     long_description=open('README.rst','rt').read(),
     url=URL,
