@@ -53,7 +53,7 @@ def plot(dirname,data,bkgd,resmat,trace,nuisancetrace,lower=[],upper=[]):
     for name,nuisance in nuisancetrace.items():
         plothistandtrace(dirname+name,nuisance,-5.,5.)        
 
-    nbins = len(data)
+    nbins = len(trace)
     for bin in xrange(nbins): 
         ## need to be fixed
         ##mcplot(trace,common_scale=False,suffix='_summary',path=dirname,format='eps')
