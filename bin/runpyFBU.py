@@ -22,7 +22,7 @@ if __name__ == "__main__":
     pyfbu.upper            = [3000]*ndim
     pyfbu.background       = {'bckg': [5,10,40,5]}
     pyfbu.backgroundsyst   = {'bckg': 0.}
-#    pyfbu.objsyst = {'jes':[0.05,0.03]}
+    pyfbu.objsyst = {'jes':[0.05,0.03,0.03,0.05]}
 #    pyfbu.systfixsigma = -1.
     pyfbu.monitoring = True
     pyfbu.name = 'test'
