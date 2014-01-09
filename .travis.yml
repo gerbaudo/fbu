@@ -4,7 +4,7 @@ python:
   - "2.7"
 
 before_install:
-  - sudo apt-get install liblapack-dev gfortran libblas-dev libsuitesparse-dev swig
+  - sudo apt-get install liblapack-dev gfortran python-scipy libblas-dev libsuitesparse-dev swig
   - if [ -f /dev/shm ]; then sudo rmdir /dev/shm; fi
   - sudo ln -Tsf /{run,dev}/shm
 
