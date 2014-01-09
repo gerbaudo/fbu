@@ -4,7 +4,7 @@ python:
   - "2.7"
 
 before_install:
-  - sudo apt-get install liblapack-dev gfortran python-scipy libblas-dev libsuitesparse-dev swig
+  - sudo apt-get install liblapack-dev gfortran libblas-dev libsuitesparse-dev swig
   - if [ -f /dev/shm ]; then sudo rmdir /dev/shm; fi
   - sudo ln -Tsf /{run,dev}/shm
 
@@ -14,6 +14,7 @@ install:
 
   # do we really need to specify the versions? they don't do it at github.com/pymc-devs/pymc
   - pip install numpy==1.7.0
+  - pip install scipy>=0.12.0
   - pip install matplotlib>=1.2.1
   - pip install pymc==2.3
   # - pip install flake8
