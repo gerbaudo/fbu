@@ -3,9 +3,9 @@ from numpy import random, dot, array
 
 class PyFBU(object):
     """A class to perform a MCMC sampling.
-
+    
     [more detailed description should be added here]
-
+    
     All configurable parameters are set to some default value, which
     can be changed later on, but before calling the `run` method.
     """
@@ -36,14 +36,14 @@ class PyFBU(object):
         self.verbose   = verbose
         self.name      = name
         self.monitoring = monitoring
-    
+        
     #__________________________________________________________
     def validateinput(self):
         def checklen(list1,list2):
             assert len(list1)==len(list2), 'Input Validation Error: inconstistent size of input'
         responsetruthbins = self.response
         responserecobins = [row for row in self.response]
-        for list in self.background.values()+self.objsyst.values()+responserecobins:
+        for list in self.background.values()+responserecobins:
             checklen(self.data,list)
         for list in [self.lower,self.upper]:
             checklen(list,responsetruthbins)
@@ -56,9 +56,16 @@ class PyFBU(object):
         self.validateinput()
         data = self.data
         data = self.fluctuate(data) if self.rndseed>=0 else data
-        backgrounds = [array(self.background[syst]) for syst in self.backgroundsyst]
-        backgroundsysts = array(self.backgroundsyst.values())
-        objsysts = array(self.objsyst.values())
+
+        # unpack background dictionaries
+        backgroundkeys = self.backgroundsyst.keys()
+        backgrounds = array([self.background[key] for key in backgroundkeys])
+        backgroundnormsysts = array([self.backgroundsyst[key] for key in backgroundkeys])
+
+        # unpack object systematics dictionary
+        objsystkeys = self.objsyst['signal'].keys()
+        signalobjsysts = array([self.objsyst['signal'][key] for key in objsystkeys])
+        backgroundobjsysts = array([[self.objsyst['background'][syst][bckg] for syst in objsystkeys] for bckg in backgroundkeys])
         recodim  = len(data)
         resmat = self.response
         truthdim = len(resmat)
@@ -72,12 +79,12 @@ class PyFBU(object):
                                     mu=0.,tau=1.0,
                                     observed=(True if (not err>0.0 or self.systfixsigma!=0) 
                                               else False) )
-                          for name,err in self.backgroundsyst.items() ]
+                          for name,err in zip(backgroundkeys,backgroundnormsysts) ]
         bckgnuisances = mc.Container(bckgnuisances)
         
         objnuisances = [ mc.Normal('gaus_%s'%name,value=self.systfixsigma,mu=0.,tau=1.0,
                                    observed=(True if self.systfixsigma!=0 else False) )
-                         for name,err in self.objsyst.items()]
+                         for name in objsystkeys]
         objnuisances = mc.Container(objnuisances)
 
         # define potential to constrain truth spectrum
@@ -97,10 +104,12 @@ class PyFBU(object):
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
         def unfold(truth=truth,bckgnuisances=bckgnuisances,objnuisances=objnuisances):
-            bckg = dot(1. + bckgnuisances*backgroundsysts,backgrounds)
+            smearbckg = 1. + dot(objnuisances,backgroundobjsysts)
+            smearedbackgrounds = backgrounds*smearbckg
+            bckg = dot(1. + bckgnuisances*backgroundnormsysts,smearedbackgrounds)
             reco = dot(truth, resmat)
-            smear = 1. + dot(objnuisances,objsysts)
-            out = (bckg + reco)*smear
+            smear = 1. + dot(objnuisances,signalobjsysts)
+            out = bckg + reco*smear
             return out
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=recodim)
@@ -124,10 +133,10 @@ class PyFBU(object):
         self.stats = mcmc.stats()
         self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(truthdim)]
         self.nuisancestrace = {}
-        for name,err in self.backgroundsyst.items():
+        for name,err in zip(backgroundkeys,backgroundnormsysts):
             if err>0.:
                 self.nuisancestrace[name] = mcmc.trace('gaus_%s'%name)[:]
-        for name in self.objsyst.keys():
+        for name in objsystkeys:
             if self.systfixsigma==0.:
                 self.nuisancestrace[name] = mcmc.trace('gaus_%s'%name)[:]
         
