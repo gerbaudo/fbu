@@ -20,9 +20,23 @@ if __name__ == "__main__":
     ndim = len(pyfbu.response)
     pyfbu.lower            = [0]*ndim
     pyfbu.upper            = [3000]*ndim
-    pyfbu.background       = {'bckg': [5,10,40,5]}
-    pyfbu.backgroundsyst   = {'bckg': 0.}
-    pyfbu.objsyst = {'jes':[0.05,0.03,0.03,0.05]}
+    pyfbu.background       = {'bckg1': [5,5,20,5],'bckg2': [0,5,20,0]}
+    pyfbu.backgroundsyst   = {'bckg1': 0.,'bckg2': 0.}
+    pyfbu.objsyst = { 
+        'signal':{'jes':[0.05,0.05,0.05,0.05],
+                  'jer':[0.03,0.03,0.03,0.03]
+                  },
+        'background':{
+            'jes':{
+                'bckg1':[0.05,0.05,0.05,0.05],
+                'bckg2':[0.01,0.01,0.01,0.01]
+                },
+            'jer':{
+                'bckg1':[0.01,0.01,0.01,0.01],
+                'bckg2':[0.05,0.05,0.05,0.05]
+                }
+            }
+        }
 #    pyfbu.systfixsigma = -1.
     pyfbu.monitoring = True
     pyfbu.name = 'test'
