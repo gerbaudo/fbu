@@ -10,7 +10,8 @@ class PyFBU(object):
     can be changed later on, but before calling the `run` method.
     """
     #__________________________________________________________
-    def __init__(self,data=[],response=[],background={},backgroundsyst={},objsyst={},
+    def __init__(self,data=[],response=[],background={},
+                 backgroundsyst={},objsyst={'signal':{},'background':{}},
                  lower=[],upper=[],
                  rndseed=-1,verbose=False,name='',monitoring=False):
         #                                     [MCMC parameters]
