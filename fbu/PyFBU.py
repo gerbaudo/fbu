@@ -67,7 +67,7 @@ class PyFBU(object):
         objsystkeys = self.objsyst['signal'].keys()
         signalobjsysts = array([self.objsyst['signal'][key] for key in objsystkeys])
         backgroundobjsysts = array([])
-        if len(objsystkeys)>0:
+        if len(objsystkeys)>0 and backgroundkeys>0:
             backgroundobjsysts = array([[self.objsyst['background'][syst][bckg] 
                                          for syst in objsystkeys] 
                                         for bckg in backgroundkeys])
@@ -109,7 +109,9 @@ class PyFBU(object):
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
         def unfold(truth=truth,bckgnuisances=bckgnuisances,objnuisances=objnuisances):
-            smearbckg = 1. + dot(objnuisances,backgroundobjsysts)
+            smearbckg = 1.
+            if len(backgroundobjsysts)>0:
+                smearbckg = smearbckg + dot(objnuisances,backgroundobjsysts) 
             smearedbackgrounds = backgrounds*smearbckg
             bckg = dot(1. + bckgnuisances*backgroundnormsysts,smearedbackgrounds)
             reco = dot(truth, resmat)
