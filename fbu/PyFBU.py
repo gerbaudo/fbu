@@ -66,7 +66,11 @@ class PyFBU(object):
         # unpack object systematics dictionary
         objsystkeys = self.objsyst['signal'].keys()
         signalobjsysts = array([self.objsyst['signal'][key] for key in objsystkeys])
-        backgroundobjsysts = array([[self.objsyst['background'][syst][bckg] for syst in objsystkeys] for bckg in backgroundkeys])
+        backgroundobjsysts = array([])
+        if len(objsystkeys)>0:
+            backgroundobjsysts = array([[self.objsyst['background'][syst][bckg] 
+                                         for syst in objsystkeys] 
+                                        for bckg in backgroundkeys])
         recodim  = len(data)
         resmat = self.response
         truthdim = len(resmat)
