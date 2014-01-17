@@ -94,17 +94,10 @@ class PyFBU(object):
 
         # define potential to constrain truth spectrum
         import potentials
-        if self.potential in potentials.potentialdict:
-            @mc.potential
-            def truthpot(truth=truth):
-                return potentials.wrapper(self.potential,
-                                          truth,size=truthdim,
-                                          other_args=self.potentialparams)
-        else:
-            print 'WARNING: potential name not found! Falling back to no potential...'
-            @mc.potential
-            def truthpot():
-                return 0.
+        reg = potentials.Regularization(regname=self.potential,
+                                        size=truthdim,
+                                        other_args=self.potentialparams)
+        truthpot = reg.getpotential(truth)
         
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
