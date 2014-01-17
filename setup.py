@@ -3,7 +3,7 @@ from setuptools import setup
 DISTNAME = 'fbu'
 DESCRIPTION = "PyFBU"
 #VERSION = '0.0.2'
-VERSION = '0.0.2dev.3'
+VERSION = '0.0.2dev.4'
 AUTHOR = 'Davide Gerbaudo, Clement Helsens and Francesco Rubbo'
 AUTHOR_EMAIL = 'rubbo.francesco@gmail.com'
 URL = 'https://github.com/gerbaudo/fbu'
