@@ -25,8 +25,8 @@ class PyFBU(object):
         self.priorparams = {}
         self.regularization = regularization
         if not regularization:
-            import potentials
-            self.regularization = potentials.Regularization()
+            import Regularization
+            self.regularization = Regularization.Regularization()
         #                                     [input]
         self.data        = data           # data list
         self.response    = response       # response matrix
