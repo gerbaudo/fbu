@@ -24,7 +24,7 @@ if __name__ == "__main__":
     pyfbu.lower            = [0]*ndim
     pyfbu.upper            = [3000]*ndim
 
-    from potentials import Regularization
+    from Regularization import Regularization
     pyfbu.regularization = Regularization('Tikhonov',ntotbins=6,ndiffbins=2)
 
     pyfbu.background       = {'bckg1': [5,5,20,5],'bckg2': [0,5,20,0]}
