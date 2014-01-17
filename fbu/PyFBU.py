@@ -12,7 +12,7 @@ class PyFBU(object):
     #__________________________________________________________
     def __init__(self,data=[],response=[],background={},
                  backgroundsyst={},objsyst={'signal':{},'background':{}},
-                 lower=[],upper=[],
+                 lower=[],upper=[],regularization=None,
                  rndseed=-1,verbose=False,name='',monitoring=False):
         #                                     [MCMC parameters]
         self.nMCMC = 100000 # N of sampling points    
@@ -23,8 +23,10 @@ class PyFBU(object):
         #                                     [unfolding model parameters]
         self.prior = 'DiscreteUniform'
         self.priorparams = {}
-        self.potential = ''
-        self.potentialparams = {}
+        self.regularization = regularization
+        if not regularization:
+            import potentials
+            self.regularization = potentials.Regularization()
         #                                     [input]
         self.data        = data           # data list
         self.response    = response       # response matrix
@@ -93,11 +95,7 @@ class PyFBU(object):
         objnuisances = mc.Container(objnuisances)
 
         # define potential to constrain truth spectrum
-        import potentials
-        reg = potentials.Regularization(regname=self.potential,
-                                        size=truthdim,
-                                        other_args=self.potentialparams)
-        truthpot = reg.getpotential(truth)
+        truthpot = self.regularization.getpotential(truth)
         
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
