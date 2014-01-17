@@ -11,7 +11,7 @@ class Regularization(object):
     def __init__(self,regname='',parameters=[]):
         self.regname = regname
         self.parameterslist = parameters
-        self.ndiffbins = len(parameters)
+        self.ndiffbins = len(parameters) if len(parameters)>0 else 1
         self.function = dummy
         if self.regname in potentialdict: 
             self.function = potentialdict[self.regname]
