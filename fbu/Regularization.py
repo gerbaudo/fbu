@@ -8,31 +8,27 @@ potentialdict = {
     }
 
 class Regularization(object):
-    def __init__(self,regname='',ntotbins=1,ndiffbins=1,other_args={}):
+    def __init__(self,regname='',parameters=[]):
         self.regname = regname
-        assert ntotbins>0 and ndiffbins>0, 'ERROR: ntotbins and ndiffbins must be >0'
-        self.edges = [(0,ntotbins)]
-        if ntotbins%ndiffbins!=0: 
-            print 'WARNING: inconsistent number of bins! Falling back to no potential...'
-            self.regname = ''
-        else:
-            nbins = ntotbins/ndiffbins
-            self.edges = [(ii,ii+nbins) for ii in range(0,ntotbins,nbins)]
-        self.other_args = other_args
+        self.parameterslist = parameters
+        self.ndiffbins = len(parameters)
         self.function = dummy
         if self.regname in potentialdict: 
             self.function = potentialdict[self.regname]
         else:
             print 'WARNING: potential name not found! Falling back to no potential...'
 
-    def wrapper(self,truth=None):
+    def wrapper(self,truth=None,parameters={}):
         default_args = dict(value=truth)
-        args = dict(default_args.items()+self.other_args.items())
+        args = dict(default_args.items()+parameters.items())
         potential = self.function(**args)
         return potential
     
     def getpotential(self,truth):
+        ntotbins = len(truth)
+        step = ntotbins/self.ndiffbins
+        edges = [(ii,ii+step) for ii in range(0,ntotbins,step)]
         potentials = [Potential(self.wrapper,self.regname,self.regname,
-                                {'truth':truth[start:end]})
-                      for (start,end) in self.edges]
+                                {'truth':truth[start:end],'parameters':params})
+                      for params,(start,end) in zip(self.parameterslist,edges)]
         return Container(potentials)
