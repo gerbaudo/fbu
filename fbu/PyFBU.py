@@ -69,7 +69,7 @@ class PyFBU(object):
         objsystkeys = self.objsyst['signal'].keys()
         signalobjsysts = array([self.objsyst['signal'][key] for key in objsystkeys])
         backgroundobjsysts = array([])
-        if len(objsystkeys)>0 and backgroundkeys>0:
+        if len(objsystkeys)>0 and len(backgroundkeys)>0:
             backgroundobjsysts = array([[self.objsyst['background'][syst][bckg] 
                                          for syst in objsystkeys] 
                                         for bckg in backgroundkeys])
