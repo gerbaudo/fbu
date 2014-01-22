@@ -82,10 +82,9 @@ class PyFBU(object):
                                     low=self.lower,up=self.upper,
                                     other_args=self.priorparams)
 
-        bckgnuisances = [ mc.Normal('gaus_%s'%name,value=self.systfixsigma if err>0.0 else 0.0,
+        bckgnuisances = [ mc.Normal('gaus_%s'%name,value=0.,
                                     mu=0.,tau=1.0,
-                                    observed=(True if (not err>0.0 or self.systfixsigma!=0) 
-                                              else False) )
+                                    observed=(False if err>0.0 else True) )
                           for name,err in zip(backgroundkeys,backgroundnormsysts) ]
         bckgnuisances = mc.Container(bckgnuisances)
         
