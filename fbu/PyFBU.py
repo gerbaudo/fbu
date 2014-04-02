@@ -12,7 +12,7 @@ class PyFBU(object):
     #__________________________________________________________
     def __init__(self,data=[],response=[],background={},
                  backgroundsyst={},objsyst={'signal':{},'background':{}},
-                 lower=[],upper=[],
+                 lower=[],upper=[],regularization=None,
                  rndseed=-1,verbose=False,name='',monitoring=False):
         #                                     [MCMC parameters]
         self.nMCMC = 100000 # N of sampling points    
@@ -23,8 +23,10 @@ class PyFBU(object):
         #                                     [unfolding model parameters]
         self.prior = 'DiscreteUniform'
         self.priorparams = {}
-        self.potential = ''
-        self.potentialparams = {}
+        self.regularization = regularization
+        if not regularization:
+            import Regularization
+            self.regularization = Regularization.Regularization()
         #                                     [input]
         self.data        = data           # data list
         self.response    = response       # response matrix
@@ -67,7 +69,7 @@ class PyFBU(object):
         objsystkeys = self.objsyst['signal'].keys()
         signalobjsysts = array([self.objsyst['signal'][key] for key in objsystkeys])
         backgroundobjsysts = array([])
-        if len(objsystkeys)>0 and backgroundkeys>0:
+        if len(objsystkeys)>0 and len(backgroundkeys)>0:
             backgroundobjsysts = array([[self.objsyst['background'][syst][bckg] 
                                          for syst in objsystkeys] 
                                         for bckg in backgroundkeys])
@@ -80,10 +82,9 @@ class PyFBU(object):
                                     low=self.lower,up=self.upper,
                                     other_args=self.priorparams)
 
-        bckgnuisances = [ mc.Normal('gaus_%s'%name,value=self.systfixsigma if err>0.0 else 0.0,
+        bckgnuisances = [ mc.Normal('gaus_%s'%name,value=0.,
                                     mu=0.,tau=1.0,
-                                    observed=(True if (not err>0.0 or self.systfixsigma!=0) 
-                                              else False) )
+                                    observed=(False if err>0.0 else True) )
                           for name,err in zip(backgroundkeys,backgroundnormsysts) ]
         bckgnuisances = mc.Container(bckgnuisances)
         
@@ -93,18 +94,7 @@ class PyFBU(object):
         objnuisances = mc.Container(objnuisances)
 
         # define potential to constrain truth spectrum
-        import potentials
-        if self.potential in potentials.potentialdict:
-            @mc.potential
-            def truthpot(truth=truth):
-                return potentials.wrapper(self.potential,
-                                          truth,size=truthdim,
-                                          other_args=self.potentialparams)
-        else:
-            print 'WARNING: potential name not found! Falling back to no potential...'
-            @mc.potential
-            def truthpot():
-                return 0.
+        truthpot = self.regularization.getpotential(truth)
         
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
