@@ -41,10 +41,12 @@ class PyFBU(object):
     def validateinput(self):
         def checklen(list1,list2):
             assert len(list1)==len(list2), 'Input Validation Error: inconstistent size of input'
-        response = [self.response]+[row for row in self.response]
-        for list in [self.lower,self.upper]+self.background.values()+response:
+        responsetruthbins = self.response
+        responserecobins = [row for row in self.response]
+        for list in self.background.values()+self.objsyst.values()+responserecobins:
             checklen(self.data,list)
-        
+        for list in [self.lower,self.upper]:
+            checklen(list,responsetruthbins)
     #__________________________________________________________
     def fluctuate(self, data):
         random.seed(self.rndseed)
@@ -57,8 +59,9 @@ class PyFBU(object):
         backgrounds = [array(self.background[syst]) for syst in self.backgroundsyst]
         backgroundsysts = array(self.backgroundsyst.values())
         objsysts = array(self.objsyst.values())
-        ndim = len(data)
+        recodim  = len(data)
         resmat = self.response
+        truthdim = len(resmat)
 
         import priors
         truth = priors.wrapper(priorname=self.prior,
@@ -83,7 +86,7 @@ class PyFBU(object):
             @mc.potential
             def truthpot(truth=truth):
                 return potentials.wrapper(self.potential,
-                                          truth,size=ndim,
+                                          truth,size=truthdim,
                                           other_args=self.potentialparams)
         else:
             print 'WARNING: potential name not found! Falling back to no potential...'
@@ -100,7 +103,7 @@ class PyFBU(object):
             out = (bckg + reco)*smear
             return out
 
-        unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=ndim)
+        unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=recodim)
         allnuisances = mc.Container(bckgnuisances + objnuisances)
         model = mc.Model([unfolded, unfold, truth, truthpot, allnuisances])
 
@@ -119,7 +122,7 @@ class PyFBU(object):
         mcmc.use_step_method(mc.AdaptiveMetropolis,truth+allnuisances)
         mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
         self.stats = mcmc.stats()
-        self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(ndim)]
+        self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(truthdim)]
         self.nuisancestrace = {}
         for name,err in self.backgroundsyst.items():
             if err>0.:
