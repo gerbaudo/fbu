@@ -1,9 +1,7 @@
 from pymc import Potential,Container
 
-def dummy(**args): return 0. 
 from tikhonov import tikhonov
 potentialdict = {
-    '' : dummy,
     'Tikhonov':tikhonov,
     }
 
@@ -12,7 +10,6 @@ class Regularization(object):
         self.regname = regname
         self.parameterslist = parameters
         self.ndiffbins = len(parameters) if len(parameters)>0 else 1
-        self.function = dummy
         if self.regname in potentialdict: 
             self.function = potentialdict[self.regname]
         else:
