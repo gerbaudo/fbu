@@ -16,13 +16,11 @@ if __name__ == "__main__":
     pyfbu.data             = [20,100,150,20]
     pyfbu.response         = [[0.06,0.02,0.01,0.01], #first truth bin
                               [0.02,0.06,0.02,0.01],
-                              [0.01,0.04,0.03,0.02], #first truth bin
-                              [0.01,0.03,0.04,0.02], #second truth bin
                               [0.01,0.02,0.06,0.02], #first truth bin
                               [0.01,0.01,0.02,0.06]] #second truth bin
     ndim = len(pyfbu.response)
-    pyfbu.lower            = [0]*ndim
-    pyfbu.upper            = [3000]*ndim
+    pyfbu.lower            = [40,200,300,40]
+    pyfbu.upper            = [800,2000,3000,800]
 
     from Regularization import Regularization
     pyfbu.regularization = Regularization('Tikhonov',parameters=[{'refcurv':0.,'alpha':0.1},{'refcurv':0.,'alpha':0.1}])
