@@ -24,9 +24,6 @@ class PyFBU(object):
         self.prior = 'DiscreteUniform'
         self.priorparams = {}
         self.regularization = regularization
-        if not regularization:
-            import Regularization
-            self.regularization = Regularization.Regularization()
         #                                     [input]
         self.data        = data           # data list
         self.response    = response       # response matrix
@@ -94,7 +91,8 @@ class PyFBU(object):
         objnuisances = mc.Container(objnuisances)
 
         # define potential to constrain truth spectrum
-        truthpot = self.regularization.getpotential(truth)
+        if self.regularization:
+            truthpot = self.regularization.getpotential(truth)
         
         #This is where the FBU method is actually implemented
         @mc.deterministic(plot=False)
@@ -111,7 +109,9 @@ class PyFBU(object):
 
         unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=recodim)
         allnuisances = mc.Container(bckgnuisances + objnuisances)
-        model = mc.Model([unfolded, unfold, truth, truthpot, allnuisances])
+        modelelements = [unfolded, unfold, truth, allnuisances]
+        if self.regularization: modelelements += [truthpot]
+        model = mc.Model(modelelements)
 
         map_ = mc.MAP( model ) # this call determines good initial MCMC values
         map_.fit()
