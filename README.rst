@@ -46,7 +46,7 @@ This will also automatically install other missing dependencies
 (this might take another while, up to several minutes...).
 
 Alternative approach - git clone
-~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Alternatively one can check out the development version of the code from the 
 `GitHub <https://github.com/gerbaudo/fbu>`_ repository:
