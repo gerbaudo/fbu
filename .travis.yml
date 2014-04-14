@@ -13,11 +13,10 @@ install:
   # sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
 
   # do we really need to specify the versions? they don't do it at github.com/pymc-devs/pymc
-  - pip install numpy==1.7.0
-  - pip install scipy
+  - pip install numpy>=1.7.0
+  - pip install scipy>=0.12.0
   - pip install matplotlib>=1.2.1
   - pip install pymc==2.3
-  # - pip install flake8
 
 script:
 

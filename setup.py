@@ -3,7 +3,7 @@ from setuptools import setup
 DISTNAME = 'fbu'
 DESCRIPTION = "PyFBU"
 #VERSION = '0.0.2'
-VERSION = '0.0.2dev.6'
+VERSION = '0.0.2'
 AUTHOR = 'Davide Gerbaudo, Clement Helsens and Francesco Rubbo'
 AUTHOR_EMAIL = 'rubbo.francesco@gmail.com'
 URL = 'https://github.com/gerbaudo/fbu'
@@ -17,7 +17,7 @@ classifiers = [
     'Operating System :: OS Independent',
     ]
 
-required = ['numpy>=1.7.0,<1.8.0','scipy>=0.12.0','matplotlib>=1.2.1','pymc==2.3']
+required = ['numpy>=1.7.0','scipy>=0.12.0','matplotlib>=1.2.1','pymc==2.3']
 
 setup(
     name=DISTNAME,
