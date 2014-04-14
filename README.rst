@@ -30,7 +30,7 @@ Install NumPy-1.7.0 (this may take a while).
 
 ::
 
-	pip install numpy==1.7.0
+	pip install "numpy>=1.7.0"
 
 
 Pip installation
@@ -45,7 +45,7 @@ The latest stable version of PyFBU can be installed using pip.
 This will also automatically install other missing dependencies
 (this might take another while, up to several minutes...).
 
-Git clone
+Alternative approach - git clone
 ~~~~~~~~~
 
 Alternatively one can check out the development version of the code from the 
