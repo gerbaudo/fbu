@@ -1,36 +1,31 @@
 language: python
-
 python:
-  - "2.7"
-
+  - 2.7
+notifications:
+  email: false
+ 
+# Setup anaconda
 before_install:
-  - sudo apt-get install liblapack-dev gfortran python-scipy libblas-dev libsuitesparse-dev swig
-  - if [ -f /dev/shm ]; then sudo rmdir /dev/shm; fi
-  - sudo ln -Tsf /{run,dev}/shm
-
+  - wget http://repo.continuum.io/miniconda/Miniconda-3.3.0-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda/bin:$PATH
+  - conda update --yes conda
+  # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
+  - sudo rm -rf /dev/shm
+  - sudo ln -s /run/shm /dev/shm
+# Install packages
 install:
-  # perhaps we could use the system libraries?
-  # sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
-
-  # do we really need to specify the versions? they don't do it at github.com/pymc-devs/pymc
-  - pip install --verbose numpy>=1.7.0
-  - pip install --verbose scipy>=0.12.0
-  - pip install --verbose matplotlib>=1.2.1
-  - pip install --verbose pymc==2.3
-
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose dateutil pandas statsmodels
+  # Coverage packages are on my binstar channel
+  - conda install --yes -c dan_blanchard python-coveralls nose-cov
+  - pip install pymc==2.3
+  - python setup.py install
+ 
+# Run test
 script:
-
   # Check if numpy and pymc are ok
   - time python -c 'import numpy as np; print np.array([1,2,3]).shape'
   - time python -c 'import pymc'
-
-  # Check that the fbu modules can be imported
-  # TBD
-  # validate syntax and check for errors (later on)
-  # - flake8 fbu/ tests/ utils/
-
-env:
-  - TESTCMD="nosetests -vv fbu.tests.test_basic"
-
-script: "$TESTCMD"
-
+  - nosetests -vv fbu.tests.test_basic
+ 
