@@ -1,5 +1,6 @@
 import pymc as mc
-from numpy import random, dot, array
+from numpy import random, dot, array, empty, inf
+import emcee
 
 class PyFBU(object):
     """A class to perform a MCMC sampling.
@@ -113,21 +114,47 @@ class PyFBU(object):
         if self.regularization: modelelements += [truthpot]
         model = mc.Model(modelelements)
 
-        map_ = mc.MAP( model ) # this call determines good initial MCMC values
-        map_.fit()
+        # This is the likelihood function for emcee
+        def lnprob(vals):
+            try:
+                for val,var in zip(vals,model.stochastics):
+                    var.value = val
+                return model.logp
+            except mc.ZeroProbability:
+                return -1*inf
 
-        mcmc = mc.MCMC( model )  # MCMC instance for model
+        # emcee parameters
+        ndim = len(model.stochastics)
+        nwalkers = 500
 
-#        for tt,low,up in zip(truth,self.lower,self.upper):
-#            mcmc.use_step_method(mc.Metropolis, tt, proposal_distribution='Normal', proposal_sd=(up-low)/100)
-#        for gaus in bckgparams+objparams:
-#            if not gaus.observed:
-#                mcmc.use_step_method(mc.Metropolis, gaus, proposal_distribution='Normal', proposal_sd=0.1)
-#        mcmc.sample(5000)
+        # Find MAP
+        mc.MAP(model).fit()
+        start = empty(ndim)
+        for i,var in enumerate(model.stochastics):
+            start[i] = var.value
+
+        # sample starting points for walkers around the MAP
+        p0 = random.randn(ndim * nwalkers).reshape((nwalkers, ndim)) + start
+
+        # instantiate sampler passing in the pymc likelihood function
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
+
+        # burn-in
+        pos, prob, state = sampler.run_mcmc(p0, 10)
+        sampler.reset()
+
+        # sample 10 * 500 = 5000
+        sampler.run_mcmc(pos, 100)
+
+        mcmc = mc.MCMC(model)  # MCMC instance for model
+        mcmc.sample(1) # This call is to set up the chains
+        for i, var in enumerate(mcmc.stochastics):
+            var.trace._trace[0] = sampler.flatchain[:, i]
+
+        mc.Matplot.plot(mcmc)
         
-        mcmc.use_step_method(mc.AdaptiveMetropolis,truth+allnuisances)
-        mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
-        self.stats = mcmc.stats()
+#        mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
+#        self.stats = mcmc.stats()
         self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(truthdim)]
         self.nuisancestrace = {}
         for name,err in zip(backgroundkeys,backgroundnormsysts):
