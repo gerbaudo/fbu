@@ -16,9 +16,9 @@ class PyFBU(object):
                  lower=[],upper=[],regularization=None,
                  rndseed=-1,verbose=False,name='',monitoring=False):
         #                                     [MCMC parameters]
-        self.nMCMC = 100000 # N of sampling points    
-        self.nBurn = 20000  # skip first N sampled points (MCMC learning period)
-        self.nThin = 1      # accept every other N sampled point (reduce autocorrelation)
+        self.nMCMC = 50000 # N of sampling points    
+        self.nBurn = 5000  # skip first N sampled points (MCMC learning period)
+        self.nThin = 10     # accept every other N sampled point (reduce autocorrelation)
         self.lower = lower  # lower sampling bounds
         self.upper = upper  # upper sampling bounds
         #                                     [unfolding model parameters]
@@ -140,11 +140,11 @@ class PyFBU(object):
         sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
 
         # burn-in
-        pos, prob, state = sampler.run_mcmc(p0, 10)
+        pos, prob, state = sampler.run_mcmc(p0, self.nBurn/nwalkers)
         sampler.reset()
 
-        # sample 10 * 500 = 5000
-        sampler.run_mcmc(pos, 100)
+        # sample
+        sampler.run_mcmc(pos, self.nMCMC/nwalkers, thin=self.nThin)
 
         mcmc = mc.MCMC(model)  # MCMC instance for model
         mcmc.sample(1) # This call is to set up the chains
