@@ -151,7 +151,7 @@ class PyFBU(object):
         for i, var in enumerate(mcmc.stochastics):
             var.trace._trace[0] = sampler.flatchain[:, i]
 
-        mc.Matplot.plot(mcmc)
+#        mc.Matplot.plot(mcmc)
         
 #        mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
 #        self.stats = mcmc.stats()
