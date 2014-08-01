@@ -13,6 +13,8 @@ class Test:
         fbu_.run()
         trace = fbu_.trace
         for bin,expected in zip(trace,[800,1600]):
+            print 'mean',mean(bin),'std',std(bin)
+            print expected
             assert_(mean(bin)+std(bin)>expected)
 
     def test_bckg(self):
@@ -26,6 +28,8 @@ class Test:
         fbu_.run()
         trace = fbu_.trace
         for bin,expected in zip(trace,[700,1000]):
+            print 'mean',mean(bin),'std',std(bin)
+            print expected
             assert_(mean(bin)+std(bin)>expected)
 
     def test_bckgsyst(self):
@@ -39,6 +43,8 @@ class Test:
         fbu_.run()
         trace = fbu_.trace
         for bin,expected in zip(trace,[700,1000]):
+            print 'mean',mean(bin),'std',std(bin)
+            print expected
             assert_(mean(bin)+std(bin)>expected)
 
     def test_objsyst(self):
@@ -53,4 +59,6 @@ class Test:
         fbu_.run()
         trace = fbu_.trace
         for bin,expected in zip(trace,[800,1600]):
+            print 'mean',mean(bin),'std',std(bin)
+            print expected
             assert_(mean(bin)+std(bin)>expected)
