@@ -148,7 +148,8 @@ class PyFBU(object):
 
         mcmc = mc.MCMC(model)  # MCMC instance for model
         mcmc.sample(1) # This call is to set up the chains
-        for i, var in enumerate(mcmc.stochastics):
+
+        for i, var in enumerate(model.stochastics):
             var.trace._trace[0] = sampler.flatchain[:, i]
 
 #        mc.Matplot.plot(mcmc)
