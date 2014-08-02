@@ -1,5 +1,5 @@
 import pymc as mc
-from numpy import random, dot, array, empty, inf
+from numpy import random, dot, array, empty, inf, mean
 import emcee
 
 class PyFBU(object):
@@ -114,6 +114,8 @@ class PyFBU(object):
         if self.regularization: modelelements += [truthpot]
         model = mc.Model(modelelements)
 
+        import pymc.progressbar as pbar
+
         # This is the likelihood function for emcee
         def lnprob(vals):
             try:
@@ -139,18 +141,30 @@ class PyFBU(object):
         # instantiate sampler passing in the pymc likelihood function
         sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
 
+        bar = pbar.progress_bar(self.nBurn/nwalkers + self.nMCMC/nwalkers)
+        i = 0
+
         # burn-in
-        pos, prob, state = sampler.run_mcmc(p0, self.nBurn/nwalkers)
+        for pos, prob, state in sampler.sample(p0, iterations=self.nBurn/nwalkers):
+            i += 1
+            bar.update(i)
         sampler.reset()
 
         # sample
-        sampler.run_mcmc(pos, self.nMCMC/nwalkers, thin=self.nThin)
+        try:
+            for p, lnprob, lnlike in sampler.sample(pos, iterations=self.nMCMC/nwalkers, 
+                                                    thin=self.nThin):
+                i += 1
+                bar.update(i)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            print("\nMean acceptance fraction during sampling: {}".format(mean(sampler.acceptance_fraction)))
+            mcmc = mc.MCMC(model)  # MCMC instance for model
+            mcmc.sample(1, progress_bar=False) # This call is to set up the chains
 
-        mcmc = mc.MCMC(model)  # MCMC instance for model
-        mcmc.sample(1) # This call is to set up the chains
-
-        for i, var in enumerate(model.stochastics):
-            var.trace._trace[0] = sampler.flatchain[:, i]
+            for i, var in enumerate(model.stochastics):
+                var.trace._trace[0] = sampler.flatchain[:, i]
 
 #        mc.Matplot.plot(mcmc)
         
