@@ -7,8 +7,8 @@ from pymc.Matplot import geweke_plot
 
 def plothistandtrace(name,xx,lower,upper):
     ax = plt.subplot(211)
-    mu = mean(xx)
-    sigma = std(xx)
+    mu = mean(xx) if 'truth' in name else 0.
+    sigma = std(xx) if 'truth' in name else 1.
     n, bins, patches = plt.hist(xx, bins=50, normed=1, facecolor='green', 
                                 alpha=0.5, histtype='stepfilled')
     yy = mlab.normpdf(bins,mu,sigma)
