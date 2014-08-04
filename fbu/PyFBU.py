@@ -81,10 +81,18 @@ class PyFBU(object):
                                     low=self.lower,up=self.upper,
                                     other_args=self.priorparams)
 
-        bckgnuisances = [ mc.Normal('gaus_%s'%name,value=0.,
-                                    mu=0.,tau=1.0,
-                                    observed=(False if err>0.0 else True) )
-                          for name,err in zip(backgroundkeys,backgroundnormsysts) ]
+        bckgnuisances = []
+        for name,err in zip(backgroundkeys,backgroundnormsysts):
+            if err<0.:
+                bckgnuisances.append( 
+                    mc.Uniform('norm_%s'%name,value=1.,lower=0.,upper=2.)
+                    )
+            else:
+                bckgnuisances.append( 
+                    mc.Normal('gaus_%s'%name,value=0.,
+                              mu=0.,tau=1.0,
+                              observed=(False if err>0.0 else True) )
+                    )
         bckgnuisances = mc.Container(bckgnuisances)
         
         objnuisances = [ mc.Normal('gaus_%s'%name,value=self.systfixsigma,mu=0.,tau=1.0,
@@ -103,7 +111,9 @@ class PyFBU(object):
             if len(backgroundobjsysts)>0:
                 smearbckg = smearbckg + dot(objnuisances,backgroundobjsysts) 
             smearedbackgrounds = backgrounds*smearbckg
-            bckg = dot(1. + bckgnuisances*backgroundnormsysts,smearedbackgrounds)
+            bckgnormerr = array([(-1.+nuis)/nuis if berr<0. else berr 
+                                 for berr,nuis in zip(backgroundnormsysts,bckgnuisances)])
+            bckg = dot(1. + bckgnuisances*bckgnormerr,smearedbackgrounds)
             reco = dot(truth, resmat)
             smear = 1. + dot(objnuisances,signalobjsysts)
             out = bckg + reco*smear
@@ -133,6 +143,8 @@ class PyFBU(object):
         self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(truthdim)]
         self.nuisancestrace = {}
         for name,err in zip(backgroundkeys,backgroundnormsysts):
+            if err<0.:
+                self.nuisancestrace[name] = mcmc.trace('norm_%s'%name)[:]
             if err>0.:
                 self.nuisancestrace[name] = mcmc.trace('gaus_%s'%name)[:]
         for name in objsystkeys:
