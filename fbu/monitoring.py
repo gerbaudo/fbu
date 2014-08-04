@@ -20,7 +20,7 @@ def plothistandtrace(name,xx,lower,upper):
     plt.subplot(212)
     x = arange(len(xx))
     plt.plot(x,xx,label='trace of %s'%name)
-    plt.savefig('%s.eps'%name)
+    plt.savefig('%s.png'%name)
     plt.close()
 
 
@@ -31,7 +31,7 @@ def plot(dirname,data,bkgd,resmat,trace,nuisancetrace,lower=[],upper=[]):
     dirname = os.path.normpath(dirname) + os.sep
 
     plt.imshow(resmat,interpolation='none',origin='lower',alpha=0.5)
-    plt.savefig(dirname+'resmat.eps')
+    plt.savefig(dirname+'resmat.png')
     plt.close()
 
     ndim = len(data)
@@ -42,7 +42,7 @@ def plot(dirname,data,bkgd,resmat,trace,nuisancetrace,lower=[],upper=[]):
         plt.plot(x,array(bkgd).sum(axis=0),'b',label='background',drawstyle='steps-mid')
     plt.ylim([0.,max(data)*1.3])
     plt.xlim([0.,len(data)])
-    plt.savefig(dirname+'databckg.eps')
+    plt.savefig(dirname+'databckg.png')
     plt.close()
 
     # plot traces and autocorrelation
@@ -61,7 +61,7 @@ def plot(dirname,data,bkgd,resmat,trace,nuisancetrace,lower=[],upper=[]):
 
         scores = pymc.geweke(trace[bin])
         # plot geweke test
-        geweke_plot(scores,'truth',path=dirname,format='eps',suffix='bin%d-geweke'%bin)
+        geweke_plot(scores,'truth',path=dirname,format='png',suffix='bin%d-geweke'%bin)
         plt.close()
         # raftery lewis test
 ##not very useful
@@ -71,5 +71,5 @@ def plot(dirname,data,bkgd,resmat,trace,nuisancetrace,lower=[],upper=[]):
         
         for name,nuisance in nuisancetrace.items():
             plt.plot(trace[bin],nuisance,',')
-            plt.savefig(dirname+'%s_bin%d.eps'%(name,bin))
+            plt.savefig(dirname+'%s_bin%d.png'%(name,bin))
             plt.close()
