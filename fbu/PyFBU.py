@@ -1,6 +1,5 @@
 import pymc as mc
-from numpy import random, dot, array, empty, inf, mean
-import emcee
+from numpy import random, dot, array
 
 class PyFBU(object):
     """A class to perform a MCMC sampling.
@@ -16,8 +15,10 @@ class PyFBU(object):
                  lower=[],upper=[],regularization=None,
                  rndseed=-1,verbose=False,name='',monitoring=False):
         #                                     [MCMC parameters]
-        self.nMCMC = 50000 # N of sampling points    
-        self.nBurn = 5000  # skip first N sampled points (MCMC learning period)
+        self.use_emcee = False
+        self.nwalkers = 500
+        self.nMCMC = 500000 # N of sampling points    
+        self.nBurn = 250000  # skip first N sampled points (MCMC learning period)
         self.nThin = 10     # accept every other N sampled point (reduce autocorrelation)
         self.lower = lower  # lower sampling bounds
         self.upper = upper  # upper sampling bounds
@@ -112,64 +113,23 @@ class PyFBU(object):
         allnuisances = mc.Container(bckgnuisances + objnuisances)
         modelelements = [unfolded, unfold, truth, allnuisances]
         if self.regularization: modelelements += [truthpot]
-        model = mc.Model(modelelements)
+        model = mc.Model(modelelements)            
 
-        import pymc.progressbar as pbar
-
-        # This is the likelihood function for emcee
-        def lnprob(vals):
-            try:
-                for val,var in zip(vals,model.stochastics):
-                    var.value = val
-                return model.logp
-            except mc.ZeroProbability:
-                return -1*inf
-
-        # emcee parameters
-        ndim = len(model.stochastics)
-        nwalkers = 500
-
-        # Find MAP
-        mc.MAP(model).fit()
-        start = empty(ndim)
-        for i,var in enumerate(model.stochastics):
-            start[i] = var.value
-
-        # sample starting points for walkers around the MAP
-        p0 = random.randn(ndim * nwalkers).reshape((nwalkers, ndim)) + start
-
-        # instantiate sampler passing in the pymc likelihood function
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob)
-
-        bar = pbar.progress_bar(self.nBurn/nwalkers + self.nMCMC/nwalkers)
-        i = 0
-
-        # burn-in
-        for pos, prob, state in sampler.sample(p0, iterations=self.nBurn/nwalkers):
-            i += 1
-            bar.update(i)
-        sampler.reset()
-
-        # sample
-        try:
-            for p, lnprob, lnlike in sampler.sample(pos, iterations=self.nMCMC/nwalkers, 
-                                                    thin=self.nThin):
-                i += 1
-                bar.update(i)
-        except KeyboardInterrupt:
-            pass
-        finally:
-            print("\nMean acceptance fraction during sampling: {}".format(mean(sampler.acceptance_fraction)))
-            mcmc = mc.MCMC(model)  # MCMC instance for model
-            mcmc.sample(1, progress_bar=False) # This call is to set up the chains
-
-            for i, var in enumerate(model.stochastics):
-                var.trace._trace[0] = sampler.flatchain[:, i]
+        if self.use_emcee:
+            from emcee_sampler import sample_emcee
+            mcmc = sample_emcee(model, nwalkers=self.nwalkers, 
+                                samples=self.nMCMC/self.nwalkers, 
+                                burn=self.nBurn/self.nwalkers,
+                                thin=self.nThin)
+        else:
+            map_ = mc.MAP(model)
+            map_.fit()
+            mcmc = mc.MCMC(model)
+            mcmc.use_step_method(mc.AdaptiveMetropolis,truth+allnuisances)
+            mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
 
 #        mc.Matplot.plot(mcmc)
         
-#        mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
-#        self.stats = mcmc.stats()
         self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(truthdim)]
         self.nuisancestrace = {}
         for name,err in zip(backgroundkeys,backgroundnormsysts):
