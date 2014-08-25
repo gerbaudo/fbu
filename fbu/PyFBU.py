@@ -85,7 +85,7 @@ class PyFBU(object):
         for name,err in zip(backgroundkeys,backgroundnormsysts):
             if err<0.:
                 bckgnuisances.append( 
-                    mc.Uniform('norm_%s'%name,value=1.,lower=0.,upper=2.)
+                    mc.Uniform('norm_%s'%name,value=1.,lower=0.,upper=3.)
                     )
             else:
                 bckgnuisances.append( 
