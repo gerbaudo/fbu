@@ -1,5 +1,5 @@
 import pymc as mc
-from numpy import random, dot, array
+from numpy import random, dot, array, inf
 
 class PyFBU(object):
     """A class to perform a MCMC sampling.
@@ -89,9 +89,10 @@ class PyFBU(object):
                     )
             else:
                 bckgnuisances.append( 
-                    mc.Normal('gaus_%s'%name,value=0.,
-                              mu=0.,tau=1.0,
-                              observed=(False if err>0.0 else True) )
+                    mc.TruncatedNormal('gaus_%s'%name,value=0.,
+                                       mu=0.,tau=1.0,
+                                       a=(-1.0/err if err>0.0 else -inf),b=inf,
+                                       observed=(False if err>0.0 else True) )
                     )
         bckgnuisances = mc.Container(bckgnuisances)
         
