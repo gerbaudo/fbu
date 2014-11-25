@@ -15,9 +15,11 @@ class PyFBU(object):
                  lower=[],upper=[],regularization=None,
                  rndseed=-1,verbose=False,name='',monitoring=False):
         #                                     [MCMC parameters]
-        self.nMCMC = 100000 # N of sampling points    
-        self.nBurn = 20000  # skip first N sampled points (MCMC learning period)
-        self.nThin = 1      # accept every other N sampled point (reduce autocorrelation)
+        self.use_emcee = False
+        self.nwalkers = 500
+        self.nMCMC = 500000 # N of sampling points    
+        self.nBurn = 250000  # skip first N sampled points (MCMC learning period)
+        self.nThin = 10     # accept every other N sampled point (reduce autocorrelation)
         self.lower = lower  # lower sampling bounds
         self.upper = upper  # upper sampling bounds
         #                                     [unfolding model parameters]
@@ -111,23 +113,23 @@ class PyFBU(object):
         allnuisances = mc.Container(bckgnuisances + objnuisances)
         modelelements = [unfolded, unfold, truth, allnuisances]
         if self.regularization: modelelements += [truthpot]
-        model = mc.Model(modelelements)
+        model = mc.Model(modelelements)            
 
-        map_ = mc.MAP( model ) # this call determines good initial MCMC values
-        map_.fit()
+        if self.use_emcee:
+            from emcee_sampler import sample_emcee
+            mcmc = sample_emcee(model, nwalkers=self.nwalkers, 
+                                samples=self.nMCMC/self.nwalkers, 
+                                burn=self.nBurn/self.nwalkers,
+                                thin=self.nThin)
+        else:
+            map_ = mc.MAP(model)
+            map_.fit()
+            mcmc = mc.MCMC(model)
+            mcmc.use_step_method(mc.AdaptiveMetropolis,truth+allnuisances)
+            mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
 
-        mcmc = mc.MCMC( model )  # MCMC instance for model
-
-#        for tt,low,up in zip(truth,self.lower,self.upper):
-#            mcmc.use_step_method(mc.Metropolis, tt, proposal_distribution='Normal', proposal_sd=(up-low)/100)
-#        for gaus in bckgparams+objparams:
-#            if not gaus.observed:
-#                mcmc.use_step_method(mc.Metropolis, gaus, proposal_distribution='Normal', proposal_sd=0.1)
-#        mcmc.sample(5000)
+#        mc.Matplot.plot(mcmc)
         
-        mcmc.use_step_method(mc.AdaptiveMetropolis,truth+allnuisances)
-        mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
-        self.stats = mcmc.stats()
         self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(truthdim)]
         self.nuisancestrace = {}
         for name,err in zip(backgroundkeys,backgroundnormsysts):
