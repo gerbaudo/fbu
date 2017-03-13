@@ -17,7 +17,7 @@ classifiers = [
     'Operating System :: OS Independent',
     ]
 
-required = ['numpy>=1.7.0','scipy>=0.12.0','matplotlib>=1.2.1','pymc==2.3','emcee']
+required = ['numpy==1.10.1','scipy>=0.12.0','matplotlib>=1.2.1','pymc==2.3','emcee']
 
 setup(
     name=DISTNAME,
