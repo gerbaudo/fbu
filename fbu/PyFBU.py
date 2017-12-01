@@ -1,4 +1,4 @@
-import pymc as mc
+import pymc3 as mc
 from numpy import random, dot, array, inf
 
 class PyFBU(object):
