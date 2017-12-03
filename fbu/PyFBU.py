@@ -1,5 +1,6 @@
 import pymc3 as mc
 from numpy import random, dot, array, inf
+import theano
 
 class PyFBU(object):
     """A class to perform a MCMC sampling.
@@ -44,10 +45,10 @@ class PyFBU(object):
             assert len(list1)==len(list2), 'Input Validation Error: inconstistent size of input'
         responsetruthbins = self.response
         responserecobins = [row for row in self.response]
-        for list in self.background.values()+responserecobins:
-            checklen(self.data,list)
-        for list in [self.lower,self.upper]:
-            checklen(list,responsetruthbins)
+        for bin in list(self.background.values())+responserecobins:
+            checklen(self.data,bin)
+        for bin in [self.lower,self.upper]:
+            checklen(bin,responsetruthbins)
     #__________________________________________________________
     def fluctuate(self, data):
         random.seed(self.rndseed)
@@ -74,76 +75,90 @@ class PyFBU(object):
         recodim  = len(data)
         resmat = self.response
         truthdim = len(resmat)
+        nbckg = len(backgroundkeys)
+        nobjsyst = len(objsystkeys)
 
-        import priors
-        truth = priors.wrapper(priorname=self.prior,
-                                    low=self.lower,up=self.upper,
-                                    other_args=self.priorparams)
+        model = mc.Model()
+        from .priors import wrapper
+        with model:
+            truth = wrapper(priorname=self.prior,
+                            low=self.lower,up=self.upper,
+                            other_args=self.priorparams)
 
-        bckgnuisances = []
-        for name,err in zip(backgroundkeys,backgroundnormsysts):
-            if err<0.:
-                bckgnuisances.append( 
-                    mc.Uniform('norm_%s'%name,value=1.,lower=0.,upper=3.)
-                    )
+            bckgnuisances = []
+            for name,err in zip(backgroundkeys,backgroundnormsysts):
+                if err<0.:
+                    bckgnuisances.append( 
+                        mc.Uniform('norm_%s'%name,lower=0.,upper=3.)
+                        )
+                else:
+                    bckgnuisances.append(
+                        mc.Bound(
+                            mc.Normal('gaus_%s'%name,
+                                      mu=0.,tau=1.0,
+                                      a=(-1.0/err if err>0.0 else -inf),b=inf,
+                                      observed=(False if err>0.0 else True) ),
+                            lower=0,upper=5)
+                        )
+            if nbckg>0:
+                bckgnuisances = mc.math.stack(bckgnuisances)
             else:
-                bckgnuisances.append( 
-                    mc.TruncatedNormal('gaus_%s'%name,value=0.,
-                                       mu=0.,tau=1.0,
-                                       a=(-1.0/err if err>0.0 else -inf),b=inf,
-                                       observed=(False if err>0.0 else True) )
-                    )
-        bckgnuisances = mc.Container(bckgnuisances)
+                #empty vector so that pymc always sees the same object. There is probably a better solution...
+                bckgnuisances = theano.tensor.dvector() 
         
-        objnuisances = [ mc.Normal('gaus_%s'%name,value=self.systfixsigma,mu=0.,tau=1.0,
-                                   observed=(True if self.systfixsigma!=0 else False) )
-                         for name in objsystkeys]
-        objnuisances = mc.Container(objnuisances)
+            objnuisances = [ mc.Normal('gaus_%s'%name,mu=0.,tau=1.0,
+                                       observed=(True if self.systfixsigma!=0 else False) )
+                             for name in objsystkeys]
+            if nobjsyst>0:
+                objnuisances = mc.math.stack(objnuisances)
+            else:
+                #empty vector so that pymc always sees the same object. There is probably a better solution...
+                objnuisances = theano.tensor.dvector() 
+
 
         # define potential to constrain truth spectrum
-        if self.regularization:
-            truthpot = self.regularization.getpotential(truth)
+            if self.regularization:
+                truthpot = self.regularization.getpotential(truth)
         
         #This is where the FBU method is actually implemented
-        @mc.deterministic(plot=False)
-        def unfold(truth=truth,bckgnuisances=bckgnuisances,objnuisances=objnuisances):
-            smearbckg = 1.
-            if len(backgroundobjsysts)>0:
-                smearbckg = smearbckg + dot(objnuisances,backgroundobjsysts) 
-            smearedbackgrounds = backgrounds*smearbckg
-            bckgnormerr = array([(-1.+nuis)/nuis if berr<0. else berr 
-                                 for berr,nuis in zip(backgroundnormsysts,bckgnuisances)])
-            bckg = dot(1. + bckgnuisances*bckgnormerr,smearedbackgrounds)
-            reco = dot(truth, resmat)
-            smear = 1. + dot(objnuisances,signalobjsysts)
-            out = bckg + reco*smear
-            return out
+            def unfold():
+                smearbckg = 1.
+                if nobjsyst>0:
+                    smearbckg = smearbckg + dot(objnuisances,backgroundobjsysts) 
+                smearedbackgrounds = backgrounds*smearbckg
+                if nbckg>0:
+                    bckgnormerr = array([(-1.+nuis)/nuis if berr<0. else berr 
+                                         for berr,nuis in zip(backgroundnormsysts,bckgnuisances)])
+                    bckg = dot(1. + bckgnuisances*bckgnormerr,smearedbackgrounds)
+                print( 'truth',truth )
+                tresmat = theano.shared(array(resmat).astype('float64'))
+                print( 'resmat',tresmat )
+                reco = theano.dot(truth, tresmat)
+                print( 'reco',reco )
+                out = reco
+                if nobjsyst>0:
+                    smear = 1. + dot(objnuisances,signalobjsysts)
+                    out = reco*smear
+                if nbckg>0:
+                    out = bckg + out
+                print( 'out',out )
+                return out
 
-        unfolded = mc.Poisson('unfolded', mu=unfold, value=data, observed=True, size=recodim)
-        allnuisances = mc.Container(bckgnuisances + objnuisances)
-        modelelements = [unfolded, unfold, truth, allnuisances]
-        if self.regularization: modelelements += [truthpot]
-        model = mc.Model(modelelements)            
+            unfolded = mc.Poisson('unfolded', mu=unfold(), 
+                                  observed=array(data))
 
-        map_ = mc.MAP(model)
-        map_.fit()
-        mcmc = mc.MCMC(model)
-        mcmc.use_step_method(mc.AdaptiveMetropolis,truth+allnuisances)
-        mcmc.sample(self.nMCMC,burn=self.nBurn,thin=self.nThin)
-
-#        mc.Matplot.plot(mcmc)
+            trace = mc.sample()
         
-        self.trace = [mcmc.trace('truth%d'%bin)[:] for bin in xrange(truthdim)]
-        self.nuisancestrace = {}
-        for name,err in zip(backgroundkeys,backgroundnormsysts):
-            if err<0.:
-                self.nuisancestrace[name] = mcmc.trace('norm_%s'%name)[:]
-            if err>0.:
-                self.nuisancestrace[name] = mcmc.trace('gaus_%s'%name)[:]
-        for name in objsystkeys:
-            if self.systfixsigma==0.:
-                self.nuisancestrace[name] = mcmc.trace('gaus_%s'%name)[:]
-        
+            self.trace = [trace['truth%d'%bin][:] for bin in range(truthdim)]
+            self.nuisancestrace = {}
+            for name,err in zip(backgroundkeys,backgroundnormsysts):
+                if err<0.:
+                    self.nuisancestrace[name] = trace('norm_%s'%name)[:]
+                if err>0.:
+                    self.nuisancestrace[name] = trace('gaus_%s'%name)[:]
+            for name in objsystkeys:
+                if self.systfixsigma==0.:
+                    self.nuisancestrace[name] = trace('gaus_%s'%name)[:]
 
         if self.monitoring:
             import monitoring
