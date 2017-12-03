@@ -19,23 +19,23 @@ class Test:
             print( expected )
             assert_(mean(bin)+std(bin)>expected)
 
-#    def test_bckg(self):
-#        fbu_ = PyFBU()
-#        fbu_.nMCMC = 100000
-#        fbu_.nBurn = 20000
-#        fbu_.data = [100,150]        
-#        fbu_.response = [[0.08,0.02],[0.02,0.08]]
-#        fbu_.lower = [0,0]
-#        fbu_.upper = [3000,3000]
-#        fbu_.background       = {'bckg1': [5,20],'bckg2': [5,30]}
-#        fbu_.backgroundsyst   = {'bckg1': 0.,'bckg2': 0.}
-#        fbu_.run()
-#        trace = fbu_.trace
-#        for bin,expected in zip(trace,[700,1000]):
-#            print( 'mean',mean(bin),'std',std(bin) )
-#            print( expected )
-#            assert_(mean(bin)+std(bin)>expected)
-#
+    def test_bckg(self):
+        fbu_ = PyFBU()
+        fbu_.nMCMC = 100000
+        fbu_.nBurn = 20000
+        fbu_.data = [100,150]        
+        fbu_.response = [[0.08,0.02],[0.02,0.08]]
+        fbu_.lower = [0,0]
+        fbu_.upper = [3000,3000]
+        fbu_.background       = {'bckg1': [5,20],'bckg2': [5,30]}
+        fbu_.backgroundsyst   = {'bckg1': 0.,'bckg2': 0.}
+        fbu_.run()
+        trace = fbu_.trace
+        for bin,expected in zip(trace,[700,1000]):
+            print( 'mean',mean(bin),'std',std(bin) )
+            print( expected )
+            assert_(mean(bin)+std(bin)>expected)
+
 #    def test_bckgsyst(self):
 #        fbu_ = PyFBU()
 #        fbu_.nMCMC = 100000
