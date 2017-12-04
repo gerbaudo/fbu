@@ -65,7 +65,6 @@ class PyFBU(object):
         
         if nbckg>0:
             backgrounds = array([self.background[key] for key in backgroundkeys])
-            backgrounds = theano.shared(backgrounds)
             backgroundnormsysts = array([self.backgroundsyst[key] for key in backgroundkeys])
 
         # unpack object systematics dictionary
@@ -73,13 +72,11 @@ class PyFBU(object):
         nobjsyst = len(objsystkeys)
         if nobjsyst>0:
             signalobjsysts = array([self.objsyst['signal'][key] for key in objsystkeys])
-            signalobjsysts = theano.shared(signalobjsysts)
             if nbckg>0:
                 backgroundobjsysts = array([])
                 backgroundobjsysts = array([[self.objsyst['background'][syst][bckg] 
                                              for syst in objsystkeys] 
                                             for bckg in backgroundkeys])
-                backgroundobjsysts = theano.shared(backgroundobjsysts)
 
         recodim  = len(data)
         resmat = self.response
@@ -123,26 +120,22 @@ class PyFBU(object):
                 if nbckg>0:
                     bckgnormerr = array([(-1.+nuis)/nuis if berr<0. else berr 
                                          for berr,nuis in zip(backgroundnormsysts,bckgnuisances)])
-                    bckgnormerr = theano.shared(bckgnormerr)
+                    
+                    smearedbackgrounds = backgrounds
                     if nobjsyst>0:
                         smearbckg = smearbckg + theano.dot(objnuisances,backgroundobjsysts) 
                         smearedbackgrounds = backgrounds*smearbckg
-                        bckg = theano.dot(1. + bckgnuisances*bckgnormerr,smearedbackgrounds)
-                    else:
-                        bckg = backgrounds*(1. + bckgnuisances*bckgnormerr)
+                        
+                    bckg = theano.dot(1. + bckgnuisances*bckgnormerr,smearedbackgrounds)
 
-                print( 'truth',truth )
-                tresmat = theano.shared(array(resmat).astype('float64'))
-                print( 'resmat',tresmat )
+                tresmat = array(resmat)
                 reco = theano.dot(truth, tresmat)
-                print( 'reco',reco )
                 out = reco
                 if nobjsyst>0:
                     smear = 1. + theano.dot(objnuisances,signalobjsysts)
                     out = reco*smear
                 if nbckg>0:
                     out = bckg + out
-                print( 'out',out )
                 return out
 
             unfolded = mc.Poisson('unfolded', mu=unfold(), 
@@ -155,12 +148,12 @@ class PyFBU(object):
             if nbckg>0:
                 for name,err in zip(backgroundkeys,backgroundnormsysts):
                     if err<0.:
-                        self.nuisancestrace[name] = trace('norm_%s'%name)[:]
+                        self.nuisancestrace[name] = trace['norm_%s'%name][:]
                     if err>0.:
-                        self.nuisancestrace[name] = trace('gaus_%s'%name)[:]
+                        self.nuisancestrace[name] = trace['gaus_%s'%name][:]
             for name in objsystkeys:
                 if self.systfixsigma==0.:
-                    self.nuisancestrace[name] = trace('gaus_%s'%name)[:]
+                    self.nuisancestrace[name] = trace['gaus_%s'%name][:]
 
 #        if self.monitoring:
 #            import monitoring
