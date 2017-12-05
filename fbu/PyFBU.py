@@ -105,8 +105,9 @@ class PyFBU(object):
                 bckgnuisances = mc.math.stack(bckgnuisances)
         
             if nobjsyst>0:
-                objnuisances = [ mc.Normal('gaus_%s'%name,mu=0.,tau=1.0,
-                                           observed=(True if self.systfixsigma!=0 else False) )
+                objnuisances = [ mc.Normal('gaus_%s'%name,mu=0.,tau=1.0#,
+                                           #observed=(True if self.systfixsigma!=0 else False) 
+                                           )
                                  for name in objsystkeys]
                 objnuisances = mc.math.stack(objnuisances)
 
