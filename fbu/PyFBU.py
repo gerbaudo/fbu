@@ -118,8 +118,9 @@ class PyFBU(object):
             def unfold():
                 smearbckg = 1.
                 if nbckg>0:
-                    bckgnormerr = array([(-1.+nuis)/nuis if berr<0. else berr 
-                                         for berr,nuis in zip(backgroundnormsysts,bckgnuisances)])
+                    bckgnormerr = [(-1.+nuis)/nuis if berr<0. else berr 
+                                         for berr,nuis in zip(backgroundnormsysts,bckgnuisances)]
+                    bckgnormerr = mc.math.stack(bckgnormerr)
                     
                     smearedbackgrounds = backgrounds
                     if nobjsyst>0:
