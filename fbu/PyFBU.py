@@ -16,10 +16,9 @@ class PyFBU(object):
                  lower=[],upper=[],regularization=None,
                  rndseed=-1,verbose=False,name='',monitoring=False):
         #                                     [MCMC parameters]
-        self.nwalkers = 500
-        self.nMCMC = 500000 # N of sampling points    
-        self.nBurn = 250000  # skip first N sampled points (MCMC learning period)
-        self.nThin = 10     # accept every other N sampled point (reduce autocorrelation)
+        self.nTune = 1000
+        self.nMCMC = 10000 # N of sampling points
+        self.target_accept = 0.95
         self.lower = lower  # lower sampling bounds
         self.upper = upper  # upper sampling bounds
         #                                     [unfolding model parameters]
@@ -143,7 +142,7 @@ class PyFBU(object):
             unfolded = mc.Poisson('unfolded', mu=unfold(), 
                                   observed=array(data))
 
-            trace = mc.sample()
+            trace = mc.sample(self.nMCMC,tune=self.nTune,target_accept=self.target_accept)
         
             self.trace = [trace['truth%d'%bin][:] for bin in range(truthdim)]
             self.nuisancestrace = {}
@@ -157,7 +156,7 @@ class PyFBU(object):
                 if self.systfixsigma==0.:
                     self.nuisancestrace[name] = trace['gaus_%s'%name][:]
 
-#        if self.monitoring:
-#            import monitoring
-#            monitoring.plot(self.name+'_monitoring',data,backgrounds,resmat,self.trace,
-#                            self.nuisancestrace,self.lower,self.upper)
+        if self.monitoring:
+            import monitoring
+            monitoring.plot(self.name+'_monitoring',data,backgrounds,resmat,self.trace,
+                            self.nuisancestrace,self.lower,self.upper)
