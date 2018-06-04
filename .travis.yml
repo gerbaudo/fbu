@@ -20,6 +20,6 @@ install:
 
 script:
   # Check if numpy and pymc are ok before testing fbu
-  - time python -c 'import numpy as np; print np.array([1,2,3]).shape'
-  - time python -c 'import pymc'
+  - time python -c 'import numpy as np; print(np.array([1,2,3]).shape)'
+  - time python -c 'import pymc3'
   - nosetests -vv fbu.tests.test_basic
