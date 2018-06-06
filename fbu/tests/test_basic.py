@@ -15,24 +15,8 @@ class Test:
         fbu_.run()
         trace = fbu_.trace
         for bin,expected in zip(trace,[800,1600]):
-            print 'mean',mean(bin),'std',std(bin)
-            print expected
-            assert_(mean(bin)+std(bin)>expected)
-
-    def test_emcee(self):
-        fbu_ = PyFBU()
-        fbu_.nMCMC = 100000
-        fbu_.nBurn = 20000
-        fbu_.use_emcee = True
-        fbu_.data = [100,150]        
-        fbu_.response = [[0.08,0.02],[0.02,0.08]]
-        fbu_.lower = [0,0]
-        fbu_.upper = [3000,3000]
-        fbu_.run()
-        trace = fbu_.trace
-        for bin,expected in zip(trace,[800,1600]):
-            print 'mean',mean(bin),'std',std(bin)
-            print expected
+            print( 'mean',mean(bin),'std',std(bin) )
+            print( expected )
             assert_(mean(bin)+std(bin)>expected)
 
     def test_bckg(self):
@@ -48,15 +32,15 @@ class Test:
         fbu_.run()
         trace = fbu_.trace
         for bin,expected in zip(trace,[700,1000]):
-            print 'mean',mean(bin),'std',std(bin)
-            print expected
+            print( 'mean',mean(bin),'std',std(bin) )
+            print( expected )
             assert_(mean(bin)+std(bin)>expected)
 
     def test_bckgsyst(self):
         fbu_ = PyFBU()
         fbu_.nMCMC = 100000
         fbu_.nBurn = 20000
-        fbu_.data = [100,150]        
+        fbu_.data = [100,150]
         fbu_.response = [[0.08,0.02],[0.02,0.08]]
         fbu_.lower = [0,0]
         fbu_.upper = [3000,3000]
@@ -65,8 +49,8 @@ class Test:
         fbu_.run()
         trace = fbu_.trace
         for bin,expected in zip(trace,[700,1000]):
-            print 'mean',mean(bin),'std',std(bin)
-            print expected
+            print( 'mean',mean(bin),'std',std(bin) )
+            print( expected )
             assert_(mean(bin)+std(bin)>expected)
 
     def test_bckgnorm(self):
@@ -82,8 +66,8 @@ class Test:
         fbu_.run()
         trace = fbu_.trace
         for bin,expected in zip(trace,[700,1000]):
-            print 'mean',mean(bin),'std',std(bin)
-            print expected
+            print( 'mean',mean(bin),'std',std(bin) )
+            print( expected )
             assert_(mean(bin)+std(bin)>expected)
 
     def test_objsyst(self):
@@ -100,6 +84,6 @@ class Test:
         fbu_.run()
         trace = fbu_.trace
         for bin,expected in zip(trace,[800,1600]):
-            print 'mean',mean(bin),'std',std(bin)
-            print expected
+            print( 'mean',mean(bin),'std',std(bin) )
+            print( expected )
             assert_(mean(bin)+std(bin)>expected)
