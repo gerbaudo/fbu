@@ -58,4 +58,4 @@ Usage
 -----
 
 A `simple tutorial <http://nbviewer.ipython.org/github/gerbaudo/fbu/blob/v0.0.3/tutorial.ipynb>`_ to help you get started.
--->
+--->
