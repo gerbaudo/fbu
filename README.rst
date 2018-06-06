@@ -29,8 +29,8 @@ PyMC 3 can be installed using conda
 
 ::
 
+   conda install mkl-service
    conda install -c conda-forge pymc3
-
 
 or pip
 
