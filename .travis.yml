@@ -15,7 +15,6 @@ install:
 
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION nose
   - source activate test-environment
-  - conda install mkl-service=2017
   - conda install -c conda-forge pymc3
   - python setup.py install
 
