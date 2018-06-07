@@ -31,42 +31,29 @@ PyMC 3 can be installed using conda
 
    conda install -c conda-forge pymc3
 
-
 or pip
 
 ::
 
     pip install git+https://github.com/pymc-devs/pymc3
 
-### Not available yet 
-#Pip installation
-#~~~~~~~~~~~~~~~~
-#
-#The latest stable version of PyFBU can be installed using pip.
-#
-#::
-# 
-#    pip install fbu
-#
-#This will also automatically install other missing dependencies
-#(this might take another while, up to several minutes...).
-#
-#Alternative approach - git clone
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
-#Alternatively one can check out the development version of the code from the 
-#`GitHub <https://github.com/gerbaudo/fbu>`_ repository:
-#
-#::
-#
-#	git clone https://github.com/gerbaudo/fbu.git
-#
-#and follow the `quickstart <https://github.com/gerbaudo/fbu/blob/master/docs/quickstart.md>`_ 
-#instructions.
-#
-#
-#Usage
-#-----
-#
-#A `simple tutorial <http://nbviewer.ipython.org/github/gerbaudo/fbu/blob/v0.0.2/tutorial.ipynb>`_
-#to help you get started.
+
+The latest stable version of PyFBU can be installed using pip.
+
+::
+ 
+    pip install fbu
+
+Alternatively one can check out the development version of the code from the 
+`GitHub <https://github.com/gerbaudo/fbu>`_ repository:
+
+::
+
+	git clone https://github.com/gerbaudo/fbu.git
+
+
+Usage
+-----
+
+A `simple tutorial <tutorial.ipynb>`_ to help you get started.
+
