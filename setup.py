@@ -34,4 +34,4 @@ setup(
     
 ##to upload package
 ## python setup.py sdist
-## python setup.py sdist upload
+## twine upload dist/*
