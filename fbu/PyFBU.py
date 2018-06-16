@@ -61,7 +61,8 @@ class PyFBU(object):
         # unpack background dictionaries
         backgroundkeys = self.backgroundsyst.keys()
         nbckg = len(backgroundkeys)
-        
+
+        backgrounds = []
         if nbckg>0:
             backgrounds = array([self.background[key] for key in backgroundkeys])
             backgroundnormsysts = array([self.backgroundsyst[key] for key in backgroundkeys])
@@ -157,6 +158,6 @@ class PyFBU(object):
                     self.nuisancestrace[name] = trace['gaus_%s'%name][:]
 
         if self.monitoring:
-            import monitoring
+            from fbu import monitoring
             monitoring.plot(self.name+'_monitoring',data,backgrounds,resmat,self.trace,
                             self.nuisancestrace,self.lower,self.upper)

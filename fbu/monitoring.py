@@ -1,9 +1,6 @@
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 from numpy import mean,std,arange,array
-import pymc
-from pymc.Matplot import plot as mcplot
-from pymc.Matplot import geweke_plot
 
 def plothistandtrace(name,xx,lower,upper):
     ax = plt.subplot(211)
@@ -45,28 +42,11 @@ def plot(dirname,data,bkgd,resmat,trace,nuisancetrace,lower=[],upper=[]):
     plt.savefig(dirname+'databckg.png')
     plt.close()
 
-    # plot traces and autocorrelation
-    #for ii,bckg in enumerate(bckgtrace):
-    #mcplot(bckg,common_scale=False,suffix='_summary',path=dirname,format='eps')
-    #plt.close()
-
     for name,nuisance in nuisancetrace.items():
         plothistandtrace(dirname+name,nuisance,-5.,5.)        
 
     nbins = len(trace)
-    for bin in xrange(nbins): 
-        ## need to be fixed
-        ##mcplot(trace,common_scale=False,suffix='_summary',path=dirname,format='eps')
-        ##plt.close()
-
-        scores = pymc.geweke(trace[bin])
-        # plot geweke test
-        geweke_plot(scores,'truth',path=dirname,format='png',suffix='bin%d-geweke'%bin)
-        plt.close()
-        # raftery lewis test
-##not very useful
-##        pymc.raftery_lewis(scores, q=0.975, r=0.005)
-
+    for bin in range(nbins): 
         plothistandtrace(dirname+'bin%d'%bin,trace[bin],lower[bin],upper[bin])
         
         for name,nuisance in nuisancetrace.items():
