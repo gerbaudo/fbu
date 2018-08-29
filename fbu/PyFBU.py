@@ -21,6 +21,7 @@ class PyFBU(object):
         self.nCores = 1 # number of CPU threads to utilize
         self.nChains = 2 # number of Markov chains to sample
         self.target_accept = 0.95
+        self.discard_tuned_samples = True # whether to discard tuning steps from posterior
         self.lower = lower  # lower sampling bounds
         self.upper = upper  # upper sampling bounds
         #                                     [unfolding model parameters]
@@ -146,7 +147,8 @@ class PyFBU(object):
                                   observed=array(data))
 
             trace = mc.sample(self.nMCMC,tune=self.nTune,cores=self.nCores,
-                              chains=self.nChains, target_accept=self.target_accept)
+                              chains=self.nChains, target_accept=self.target_accept,
+                              discard_tuned_samples=self.discard_tuned_samples)
 
             self.trace = [trace['truth%d'%bin][:] for bin in range(truthdim)]
             self.nuisancestrace = {}
