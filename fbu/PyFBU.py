@@ -40,6 +40,7 @@ class PyFBU(object):
         self.verbose   = verbose
         self.name      = name
         self.monitoring = monitoring
+        self.sampling_progressbar = True
 
     #__________________________________________________________
     def validateinput(self):
@@ -146,9 +147,18 @@ class PyFBU(object):
             unfolded = mc.Poisson('unfolded', mu=unfold(),
                                   observed=array(data))
 
+            import time
+            from datetime import timedelta
+            init_time = time.time()
             trace = mc.sample(self.nMCMC,tune=self.nTune,cores=self.nCores,
                               chains=self.nChains, target_accept=self.target_accept,
-                              discard_tuned_samples=self.discard_tuned_samples)
+                              discard_tuned_samples=self.discard_tuned_samples,
+                              progressbar=self.sampling_progressbar)
+            finish_time = time.time()
+            print('Elapsed {0} ({1:.2f} samples/second)'.format(
+                str(timedelta(seconds=(finish_time-init_time))).split('.')[0],
+                (self.nMCMC+self.nTune)*self.nChains/(finish_time-init_time)
+            ))
 
             self.trace = [trace['truth%d'%bin][:] for bin in range(truthdim)]
             self.nuisancestrace = {}
