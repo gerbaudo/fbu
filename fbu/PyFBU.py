@@ -4,9 +4,9 @@ import theano
 
 class PyFBU(object):
     """A class to perform a MCMC sampling.
-    
+
     [more detailed description should be added here]
-    
+
     All configurable parameters are set to some default value, which
     can be changed later on, but before calling the `run` method.
     """
@@ -18,7 +18,10 @@ class PyFBU(object):
         #                                     [MCMC parameters]
         self.nTune = 1000
         self.nMCMC = 10000 # N of sampling points
-        self.target_accept = 0.95
+        self.nCores = 1 # number of CPU threads to utilize
+        self.nChains = 2 # number of Markov chains to sample
+        self.nuts_kwargs = None
+        self.discard_tuned_samples = True # whether to discard tuning steps from posterior
         self.lower = lower  # lower sampling bounds
         self.upper = upper  # upper sampling bounds
         #                                     [unfolding model parameters]
@@ -37,7 +40,8 @@ class PyFBU(object):
         self.verbose   = verbose
         self.name      = name
         self.monitoring = monitoring
-        
+        self.sampling_progressbar = True
+
     #__________________________________________________________
     def validateinput(self):
         def checklen(list1,list2):
@@ -74,8 +78,8 @@ class PyFBU(object):
             signalobjsysts = array([self.objsyst['signal'][key] for key in objsystkeys])
             if nbckg>0:
                 backgroundobjsysts = array([])
-                backgroundobjsysts = array([[self.objsyst['background'][syst][bckg] 
-                                             for syst in objsystkeys] 
+                backgroundobjsysts = array([[self.objsyst['background'][syst][bckg]
+                                             for syst in objsystkeys]
                                             for bckg in backgroundkeys])
 
         recodim  = len(data)
@@ -88,12 +92,12 @@ class PyFBU(object):
             truth = wrapper(priorname=self.prior,
                             low=self.lower,up=self.upper,
                             other_args=self.priorparams)
-            
+
             if nbckg>0:
                 bckgnuisances = []
                 for name,err in zip(backgroundkeys,backgroundnormsysts):
                     if err<0.:
-                        bckgnuisances.append( 
+                        bckgnuisances.append(
                             mc.Uniform('norm_%s'%name,lower=0.,upper=3.)
                             )
                     else:
@@ -103,10 +107,10 @@ class PyFBU(object):
                                           mu=0.,tau=1.0)
                             )
                 bckgnuisances = mc.math.stack(bckgnuisances)
-        
+
             if nobjsyst>0:
                 objnuisances = [ mc.Normal('gaus_%s'%name,mu=0.,tau=1.0#,
-                                           #observed=(True if self.systfixsigma!=0 else False) 
+                                           #observed=(True if self.systfixsigma!=0 else False)
                                            )
                                  for name in objsystkeys]
                 objnuisances = mc.math.stack(objnuisances)
@@ -114,20 +118,20 @@ class PyFBU(object):
         # define potential to constrain truth spectrum
             if self.regularization:
                 truthpot = self.regularization.getpotential(truth)
-        
+
         #This is where the FBU method is actually implemented
             def unfold():
                 smearbckg = 1.
                 if nbckg>0:
-                    bckgnormerr = [(-1.+nuis)/nuis if berr<0. else berr 
+                    bckgnormerr = [(-1.+nuis)/nuis if berr<0. else berr
                                          for berr,nuis in zip(backgroundnormsysts,bckgnuisances)]
                     bckgnormerr = mc.math.stack(bckgnormerr)
-                    
+
                     smearedbackgrounds = backgrounds
                     if nobjsyst>0:
-                        smearbckg = smearbckg + theano.dot(objnuisances,backgroundobjsysts) 
+                        smearbckg = smearbckg + theano.dot(objnuisances,backgroundobjsysts)
                         smearedbackgrounds = backgrounds*smearbckg
-                        
+
                     bckg = theano.dot(1. + bckgnuisances*bckgnormerr,smearedbackgrounds)
 
                 tresmat = array(resmat)
@@ -140,11 +144,22 @@ class PyFBU(object):
                     out = bckg + out
                 return out
 
-            unfolded = mc.Poisson('unfolded', mu=unfold(), 
+            unfolded = mc.Poisson('unfolded', mu=unfold(),
                                   observed=array(data))
 
-            trace = mc.sample(self.nMCMC,tune=self.nTune,target_accept=self.target_accept)
-        
+            import time
+            from datetime import timedelta
+            init_time = time.time()
+            trace = mc.sample(self.nMCMC,tune=self.nTune,cores=self.nCores,
+                              chains=self.nChains, nuts_kwargs=self.nuts_kwargs,
+                              discard_tuned_samples=self.discard_tuned_samples,
+                              progressbar=self.sampling_progressbar)
+            finish_time = time.time()
+            print('Elapsed {0} ({1:.2f} samples/second)'.format(
+                str(timedelta(seconds=(finish_time-init_time))).split('.')[0],
+                (self.nMCMC+self.nTune)*self.nChains/(finish_time-init_time)
+            ))
+
             self.trace = [trace['truth%d'%bin][:] for bin in range(truthdim)]
             self.nuisancestrace = {}
             if nbckg>0:
