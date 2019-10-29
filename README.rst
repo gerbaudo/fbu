@@ -1,3 +1,8 @@
+=====================================
+Moved to https://github.com/pyFBU/fbu
+=====================================
+
+
 .. image:: https://travis-ci.org/gerbaudo/fbu.png
    :target: https://travis-ci.org/gerbaudo/fbu
 
